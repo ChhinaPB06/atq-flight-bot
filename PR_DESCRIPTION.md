@@ -1,26 +1,9 @@
-Calgary's January 2027 UTC offset differed between the cloud and CI images.
-The scanner and stored-fare audit now explicitly load pinned tzdata2026.6
-(IANA2026f), so whole-journey duration validation uses the same current rules.
-New quotes retain the rules version. A regression rejects an itinerary older
-rules would admit as30h30 but current rules calculate as31h30.
+Disconnected connecting flights could pass validation, failed initial searches could repeatedly block unchecked dates, and a failed refresh could leave an old price looking current. Tighten journey/time validation, preserve typed provider failure and rejection reasons, rotate failed dates fairly, and separate current prices from historical observations.
 
-Add a read-only54pair CSV/JSON export with explicit observation timestamps,
-freshness, provider/status, CAD price and duration checks. Live run41654025980
-completed the remaining16initial attempts:54/54attempted cumulatively,44with
-usable quotes,5provider-empty/unverified and5validation-filtered. The degraded
-run remained visibly failed, preserved all116prior observations and saved147;
-all134active-pair APIobservations pass the current-rule audit. Best observed
-CAD2074 Jan29/Apr21 is a search quote, not checkout-confirmed.
+A corrupt or missing restore source could leave an empty SQLite destination that an always-save step might publish. Read sources without creating them, validate the history schema and temporary backup, replace atomically, and save only after a successful restore. Preserve fare, quota and coverage tables together.
 
-The manual native-alert pilot imports approved.eml exports into a separate
-unverified/deduplicated table and can explicitly verify through the existing
-Free-budget client. Its tests use synthetic email; a real Google alert template,
-mailbox ingestion and all54native watches have not been demonstrated. Telegram
-remains deferred. No paid source, new account permission or billing is enabled.
+The native email prototype now rejects inconsistent routes, extra dates and duplicate headers, and shares scanner failure classification. Coverage exports retain historical prices with explicit confidence and exclude invalid quotes from valid/fresh counts. CI evidence requires dedicated scanner-step/date provenance so unit fixtures cannot establish a live result.
 
-Validation:58tests per stable/upstream; remoteCI41656960169 passed; actionlint
-and gitdiffcheck pass. Four-hour scheduling remains subject to Free limits:
-after the initial pass, at most2pairs/day, approximately27days for a54pairrotation.
-This does not meet fresh detailed54pairverification every4hours. Full readiness
-is not claimed. Repository policy blocks Actions PR creation; this file is
-prepared review text, not evidence that a PR exists.
+Validation: 88 tests pass under stable and upstream, actionlint and diffcheck pass. Read-only audit of 134 saved quotes and replay of 268 normalized journey directions pass. Actual-history backup preserves 147 observations, 54 pairs/checks and 112 reserved searches. No provider requests or quota were used by the six specialists. Integrated remote CI pending.
+
+Existing cumulative coverage remains 54/54 attempted, 44 with usable quotes, five empty/unverified and five validation-filtered. This is not fresh full-grid verification. A real native email/inbox path remains unavailable, 54 watches are unverified, Telegram is deferred, and Free limits prevent fresh detailed full-grid checks every four hours. Repository policy blocks Actions PR creation; this is prepared review text, not a claim that a PR exists.

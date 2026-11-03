@@ -396,3 +396,31 @@ an independently calculated over31hregression cover the changed boundary.
 E020 deployed by ordinary mainfastforward toc58a69e. Production41657335604 and
 mainofflineCI41657334969 passed. No newfare-refresh claim follows from that
 greenrun;54pairinitialattempt evidence remains41654025980 with44usablequotes.
+
+## E021 — authorized six-specialist review and integration
+
+User explicitly authorized six parallel specialists. Assigned exclusive provider,
+coverage, native-email, persistence/workflow, scanner and independent-acceptance
+work. Coordinator alone owns Git/deployment and live-call decisions. All provider
+network calls disabled for specialists; existing Free limits and ledger preserved.
+Hypotheses: malformed journeys, stale/current quote reporting and failed restore
+paths may pass existing tests. Reproduce before fixing; validate against offline
+fixtures and the immutable147observation snapshot, never manufacture fresh fares.
+
+Reproduced and fixed disconnected legs/negative connections and subminute>31h
+acceptance, malformed payload failure classes, rejected-outbound misclassification,
+initial-failure starvation, stale current prices, unaudited idle runs, ambiguous
+email bodies/headers/dates, invalid/history quote confidence and unsafe SQLite
+restore destinations. Atomic backup plus restore-success save guard prevents a
+failed restore from publishing empty history. CI extraction now requires dated
+events from dedicated scanner steps; unit-test output is not live evidence.
+
+88tests pass under stable and upstream, actionlint and diffcheck pass. Independent
+review replayed268normalized saved journeys from134quotes:0failures; cabin/type
+were reconstructed from prior validation, so this is archived replay, not fresh
+raw-payload/provider evidence. Actual147observation backup preserved54pairs,
+54completedchecks,112reservedsearches and integrityok. At16:00UTC baseline is
+54/54attempted,44validated/current-statususable,5empty,5filtered,25quoteswithin4h.
+No live fare calls, additional quota, inbox access, account or permission changes.
+Real native email/ingestion, Free refresh limits, deferredTelegram and blocked
+ActionsPRcreation remain explicit acceptance gaps. Remote validation pending.

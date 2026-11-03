@@ -24,6 +24,11 @@ def inspect_run(run):
     with zipfile.ZipFile(io.BytesIO(result.stdout)) as archive:
         for name in archive.namelist():
             if not name.endswith('.txt'):continue
+            # Combined job logs also contain unit-test fixture output. Only
+            # dedicated scanner step logs can establish a real LIVE event.
+            step=name.rsplit('/',1)[-1].lower()
+            live_step=('/' in name and ('flight watch task' in step or
+                ('restore' in step and ('scan' in step or 'attempt' in step))))
             text=archive.read(name).decode(errors='replace')
             for line in text.splitlines():
                 # Verbose unit tests print fixture health on the test-name line.
@@ -45,6 +50,9 @@ def inspect_run(run):
                             continue  # incomplete/test-only records cannot prove route health
                         data={'status':data.get('status'),'probes':{k:{f:v.get(f) for f in ('route','returned','error')} for k,v in data.get('probes',{}).items()}}
                     else:
+                        if not live_step or not all(isinstance(data.get(k),str) and
+                            re.fullmatch(r'\d{4}-\d{2}-\d{2}',data[k])
+                            for k in ('depart','return_date')):continue
                         data={k:data.get(k) for k in ('depart','return_date','raw_pairs','eligible','rejected','provider_status')}
                     if data not in report[key]:report[key].append(data)
     return report

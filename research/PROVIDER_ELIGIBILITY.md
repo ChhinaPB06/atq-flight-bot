@@ -1,5 +1,13 @@
 # Independent-provider eligibility decision
 
+Current checkpoint (supersedes historical candidate notes below): SerpApi Free
+is configured and deployed; account eligibility uses plan_id=free and zero
+monthly price. All54active pairs have a completed initial attempt,44with usable
+quotes. Production uses durable240/month and40/rolling-hour caps; after the
+initial pass the daily cap is4searches (at most2pairs/day). The key is not missing
+and the adapter is enabled. Current evidence and scope are in PROJECT_STATUS.md.
+The sections below retain the earlier216pair evaluation for decision history.
+
 ## Amadeus: not eligible for autonomous production enrollment
 
 Primary source: official [amadeus4dev/developer-guides](https://github.com/amadeus4dev/developer-guides),

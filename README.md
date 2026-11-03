@@ -105,6 +105,15 @@ failures, duration rejection and above-threshold quotes are distinct outcomes.
 Empty responses do **not** prove zero flights. API errors stop the run; quota
 exhaustion is explicitly logged as no new live verification. A batch with empty
 or rejected searches is marked degraded even when other dates produced quotes.
+Provider diagnostics include bounded rejection reasons. Blocked/rate-limited,
+timeout and parser errors remain distinct. Only continuous connected journeys
+with valid airport-local timestamps are accepted; same-airport layovers cannot
+depart before arrival. A failed refresh clears the current price while retaining
+earlier observations, and failed initial queries rotate behind unchecked dates.
+
+History backup reads the source without creating it, rejects missing/corrupt or
+schema-less databases, validates a temporary copy and replaces the destination
+atomically. The scheduled job will not save after a failed restore.
 
 ## Telegram (currently deferred)
 
@@ -129,8 +138,9 @@ records only the user's reported checkout observation, never an independent chec
   active first-pass coverage6/54 before the main sweep.
 - Best observed at that checkpoint: **CAD2245,Jan27–Apr20**,83days,
   **25h25m outbound /28h10m return**, search quote only. New scans may change it.
-- **58offline tests** pass under stable and upstream in remoteCI41656960169;
-  actionlint passes. Tests alone are not live fare proof.
+- **88offline tests** pass locally under stable and upstream after the specialist
+  review; current remote validation is recorded in PROJECT_STATUS.md. The earlier
+  58test baseline passed remoteCI41656960169. Tests alone are not live fare proof.
 
 Inspect Actions summaries, LIVE DIAGNOSTIC, COVERAGE, saved history and the
 flight-provider-evidence branch. Run `python tracker.py status` against a restored
@@ -151,6 +161,9 @@ python scripts/coverage_report.py --db /path/to/restored/fares.sqlite3 --csv /pa
 
 It reports exact date-grid membership, cumulative attempts, quote timestamps,
 four-hour quote freshness, provider/status, CAD prices, durations and search links.
+Current-usable price/confidence means the most recent recorded attempt, not a
+new quote at report-generation time. Historical prices remain explicit after
+failed refreshes; invalid stored quotes cannot count as valid or fresh.
 It independently rechecks stored API quotes against currency, route/date,
 connection and elapsed-duration constraints. It issues no provider request and
 does not modify the database or spend credits. A successful audit validates stored

@@ -5,10 +5,12 @@
 - `signals/native_email.py` parses an explicitly supplied `.eml` export locally.
   It reads the preferred message body, ignores attachments/script/style content,
   and does not fetch links, tracking pixels, mailboxes or other network resources.
-- Strict pilot requires an explicit Calgary→Amritsar route, exactly one active
+- Strict pilot requires an explicit Calgary→Amritsar route in the visible body, exactly one active
   datepair with fullISOyears, one explicit CAD/CA$/C$amount, and a timezone-bearing
   message Date. Ambiguous currencies, multiple prices/dates, unsupported layouts
-  and out-of-scope pairs fail closed. No inferred current year or `$` currency.
+  and out-of-scope pairs fail closed. Additional ISO dates, even outside the active
+  grid, and duplicate Date/Subject headers are rejected. A forward route in the
+  Subject cannot override a reverse-only body. No inferred current year or `$` currency.
 - Reported prices use integer cents. Import stores only extracted travel facts,
   a deduplication fingerprint and timestamps, never raw email/sender/recipient.
   Source authentication remains unverified; an export is not proof of Google origin.
@@ -19,14 +21,19 @@
   price with the alert threshold. It never substitutes an emailed price for a
   returned fare and never sends Telegram. Completed events are not re-queried;
   quota/credential failures remain explicit. One verification in progress is locked.
+  Missing dependencies are detected before acquiring that lock. Nonempty rejected
+  outbounds, empty responses and parser failures reuse the same diagnostic classifier
+  as scheduled scans. Parser failures remain explicitly failed and can be retried
+  manually after repair; completed no-data results do not trigger repeated requests.
 - `.eml`/`.msg` exports are ignored by Git. Keep private files outside the checkout.
 
 ## Evidence and limitations
 
-54local tests pass under both installedFli versions. Native tests are **synthetic**:
+Native tests are **synthetic**, including:
 CAD cents, HTML/script exclusion, ignored attachment, ambiguous field rejection,
 deduplication, no live observation on import, actual-vs-reported price, completed
-verification dedup and quota deferral. CLI smoke import twice returned the same
+verification dedup, quota deferral, duplicate/extra-date rejection, reverse-body
+rejection, dependency failure before locking and canonical response classification. CLI smoke import twice returned the same
 id and unverified status. No private inbox, Google watch or real email was used;
 no API call or notification was made for these tests.
 
@@ -48,8 +55,8 @@ live end-to-end native-alert integration or of all54fresh results every4hours.
    trip dates/year, price/currency, subject and message Date/timezone. Remove your
    name, recipient/address and private tracking identifiers. Never include tokens
    or passwords. We need the actual layout before claiming reliable parsing.
-4. Parse that sample and inspect extracted unverified facts before authorizing
-   its one bounded live verification. The existing API key is in GitHub Secrets;
+4. Parse that sample and inspect extracted unverified facts, then perform
+   its one bounded live verification within the existing authorized Free budget. The existing API key is in GitHub Secrets;
    do not copy its value into chat or email exports. Arrange a secure execution
    binding when the real fixture is ready; this pilot does not extract GitHub keys.
 
@@ -75,3 +82,19 @@ after confirming no verification is still in flight; no automatic retry loop.
 
 No Google/mail account settings or paid service changed. The running Free monitor
 continues its current scan cadence, scope, budget and deferred-Telegram behavior.
+
+## Specialist audit evidence
+
+Reproduced offline that a forward-route Subject masked a reverse-route body, and
+that an extra ISO date outside the active grid was silently ignored. Both now
+fail closed. Regression messages are explicitly synthetic; they do not establish
+compatibility with a real Google email. Importing a missing provider dependency
+no longer leaves the event stuck in the verifying lock. No raw message or email
+addresses are persisted, no remote resources are fetched during import, and no
+provider search, inbox access or quota use occurred during this audit.
+
+Remaining external prerequisite: one approved exported native alert with its actual
+layout, explicit trip facts and message Date/timezone retained. The session has no
+signed-in mailbox/browser connector. Fifty-four prepared links are not evidence
+of fifty-four active watches, and significant-change emails do not guarantee
+fresh detailed quotes every four hours.

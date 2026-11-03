@@ -1,6 +1,9 @@
 from datetime import datetime,timezone,timedelta
 import sqlite3
+import io
 import unittest
+from unittest.mock import patch
+from urllib.error import HTTPError,URLError
 from providers.serpapi import Client,reserve,BudgetExhausted,ProviderAccessError
 
 
@@ -127,3 +130,87 @@ class SerpApiTests(unittest.TestCase):
         with sqlite3.connect(':memory:') as con:
             with self.assertRaises(ProviderAccessError):Client('test-only',request).search(con,'2027-01-27','2027-04-17')
             self.assertEqual(con.execute('SELECT SUM(searches) FROM serpapi_usage').fetchone()[0],2)
+
+    def test_disconnected_or_negative_layover_cannot_be_accepted(self):
+        from providers.serpapi import journey,ProviderDataError
+        for second_origin,second_depart in [('JFK','2027-04-20 18:00'),('DOH','2027-04-20 14:00')]:
+            item=flight('ATQ','YYC','2027-04-20')
+            item['flights']=[
+                {'departure_airport':{'id':'ATQ','time':'2027-04-20 12:00'},
+                 'arrival_airport':{'id':'DOH','time':'2027-04-20 15:00'},'travel_class':'Economy'},
+                {'departure_airport':{'id':second_origin,'time':second_depart},
+                 'arrival_airport':{'id':'YYC','time':'2027-04-20 23:00'},'travel_class':'Economy'}]
+            with self.subTest(second_origin=second_origin),self.assertRaises(ProviderDataError) as error:
+                journey(item,'ATQ','YYC','2027-04-20')
+            self.assertEqual(error.exception.reason,'route_or_date_mismatch')
+
+    def test_malformed_timestamp_is_counted_as_parser_rejection_not_empty(self):
+        out=flight('YYC','ATQ','2027-01-27');out['departure_token']='test-token'
+        bad=flight('ATQ','YYC','2027-04-20')
+        bad['flights'][0]['arrival_airport']['time']='not-a-timestamp'
+        valid=flight('ATQ','YYC','2027-04-20',price=2400)
+        responses=[{'plan_id':'free','plan_monthly_price':0,'total_searches_left':250},
+                   {'search_parameters':{'currency':'CAD'},'best_flights':[out]},
+                   {'search_parameters':{'currency':'CAD'},'best_flights':[bad,valid]}]
+        with sqlite3.connect(':memory:') as con:
+            offers,report=Client('test-only',lambda p,q:responses.pop(0)).search(con,'2027-01-27','2027-04-20')
+        self.assertEqual([o['price_cad'] for o in offers],[2400])
+        self.assertEqual(report['return_rejection_reasons'],{'parser_error':1})
+        self.assertEqual(report['provider_status'],'eligible_found')
+
+    def test_all_rejected_outbounds_are_not_reported_as_provider_empty(self):
+        over=flight('YYC','ATQ','2027-01-27',duration=1900)
+        responses=[{'plan_id':'free','plan_monthly_price':0,'total_searches_left':250},
+                   {'search_parameters':{'currency':'CAD'},'best_flights':[over]}]
+        with sqlite3.connect(':memory:') as con:
+            offers,report=Client('test-only',lambda p,q:responses.pop(0)).search(con,'2027-01-27','2027-04-20')
+            self.assertEqual(con.execute('SELECT SUM(searches) FROM serpapi_usage').fetchone()[0],1)
+        self.assertEqual(offers,[])
+        self.assertEqual(report['outbound_rejection_reasons'],{'duration_limit':1})
+        self.assertEqual(report['provider_status'],'all_rejected')
+
+    def test_mixed_parser_and_duration_rejections_remain_parser_failure(self):
+        from providers.serpapi import diagnostic_status
+        self.assertEqual(diagnostic_status([],{'outbound_rows':2,
+            'outbound_rejection_reasons':{'parser_error':1,'duration_limit':1}}),'parser_error')
+        self.assertEqual(diagnostic_status([],{'outbound_rows':4,'return_rows':0}),'empty_response')
+
+    def test_wrong_provider_collection_and_offset_timestamp_are_rejected(self):
+        from providers.serpapi import rows,journey,ProviderDataError
+        for payload in [[],{'search_parameters':{'currency':'CAD'},'best_flights':None},
+                        {'search_parameters':{'currency':'CAD'},'best_flights':{'flights':[]}}]:
+            with self.subTest(payload=payload),self.assertRaises(ProviderDataError):rows(payload)
+        for stamp in ['2027-04-20','2027-04-20 23:00+00:00','2027-04-20 25:00']:
+            item=flight('ATQ','YYC','2027-04-20')
+            item['flights'][0]['arrival_airport']['time']=stamp
+            with self.subTest(stamp=stamp),self.assertRaises(ProviderDataError) as error:
+                journey(item,'ATQ','YYC','2027-04-20')
+            self.assertEqual(error.exception.reason,'parser_error')
+
+    def test_transport_failures_are_classified_without_leaking_request_credentials(self):
+        from providers.serpapi import ProviderBlocked,ProviderTimeout,ProviderRateLimit,ProviderDataError
+        private_url='https://provider.invalid/?api_key=never-export-this-value'
+        failures=[(HTTPError(private_url,403,'Forbidden',{},None),ProviderBlocked),
+                  (HTTPError(private_url,429,'Too many requests',{},None),ProviderRateLimit),
+                  (HTTPError(private_url,503,'Service unavailable',{},None),ProviderAccessError),
+                  (TimeoutError(private_url),ProviderTimeout),
+                  (URLError(TimeoutError(private_url)),ProviderTimeout)]
+        for failure,expected in failures:
+            with self.subTest(expected=expected),patch('providers.serpapi.urlopen',side_effect=failure) as request:
+                with self.assertRaises(expected) as caught:Client('never-export-this-value')._request('search.json',{})
+                self.assertNotIn('never-export-this-value',str(caught.exception))
+                self.assertNotIn('https:',str(caught.exception))
+                self.assertEqual(request.call_count,1)
+        with patch('providers.serpapi.urlopen',return_value=io.BytesIO(b'not JSON')):
+            with self.assertRaises(ProviderDataError):Client('never-export-this-value')._request('search.json',{})
+
+    def test_quota_error_has_priority_over_incidental_no_results_text(self):
+        from providers.serpapi import rows,ProviderRateLimit
+        with self.assertRaises(ProviderRateLimit):rows({'error':'No results found because the hourly limit was reached.'})
+
+    def test_seconds_over_31_hours_are_not_truncated_into_an_eligible_fare(self):
+        from providers.serpapi import journey,ProviderDataError
+        item=flight('YYC','ATQ','2027-01-27',duration=1860)
+        item['flights'][0]['arrival_airport']['time']='2027-01-29 06:30:01'
+        with self.assertRaises(ProviderDataError) as caught:journey(item,'YYC','ATQ','2027-01-27')
+        self.assertEqual(caught.exception.reason,'duration_limit')

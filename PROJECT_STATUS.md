@@ -1,5 +1,29 @@
 # Flight bot status and decision log
 
+## Six-specialist integration checkpoint
+
+User-authorized provider, coverage, native-email, persistence, scanner and
+independent-acceptance specialists completed their assigned reviews. Coordinator
+integrated fixes for disconnected/invalid journeys, subminute duration overflow,
+provider failure classification, fair rotation after errors, stale current-price
+reporting, ambiguous email fields, and corrupt/missing restore safety. Saving is
+blocked after failed restore; backups are validated and atomically replaced.
+CI live evidence now requires a dedicated scanner step plus actual searched dates.
+
+88tests pass in both local dependency environments; actionlint/diffcheck pass.
+Real immutable snapshot remains147observations,54completedpairchecks,44usable
+pairs,5empty,5filtered and112reservedsearches. Current-rule audit134quotes and
+independent268normalized-journey replay pass; replay is not fresh provider data.
+Actual-history atomic backup preserves allcounts and integrityok. Specialists
+made no provider/inbox calls and spent no flight quota. Integrated remote CI and
+deployment remain to be verified. See research/INDEPENDENT_ACCEPTANCE.md.
+
+Genuine remaining gates: approved real native email and authorized ingestion,
+unverified54Googlewatches, Free allowance insufficient for full54pair4hrefresh,
+deferredTelegram and account policy preventing ActionsPRcreation. Today's112
+reservedcalls exceed the steady4/daycap; no extra live validation is authorized
+by the current local budget. Do not bypass it with another agent or quota DB.
+
 ## Current checkpoint — all 54 attempted; native integration remains incomplete
 
 Run41654025980 completed the initial attempt pass:54/54datepairs,44with usable

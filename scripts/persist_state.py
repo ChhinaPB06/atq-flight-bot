@@ -4,6 +4,8 @@ from pathlib import Path
 import sqlite3
 import subprocess
 import sys
+import tempfile
+from contextlib import closing
 
 
 def git(*args, cwd=None):
@@ -11,11 +13,36 @@ def git(*args, cwd=None):
 
 
 def backup(source, destination):
+    source, destination = Path(source), Path(destination)
+    if not source.is_file():
+        raise FileNotFoundError('SQLite backup source does not exist')
+    if source.resolve() == destination.resolve():
+        raise ValueError('SQLite backup source and destination must differ')
     destination.parent.mkdir(parents=True, exist_ok=True)
-    with sqlite3.connect(source) as src, sqlite3.connect(destination) as dst:
-        if src.execute('PRAGMA integrity_check').fetchone()[0] != 'ok':
-            raise RuntimeError('Database integrity check failed')
-        src.backup(dst)
+    temporary = None
+    try:
+        # A missing source must never become a new empty SQLite database.
+        with closing(sqlite3.connect(source.resolve().as_uri()+'?mode=ro', uri=True)) as src:
+            if src.execute('PRAGMA integrity_check').fetchall() != [('ok',)]:
+                raise RuntimeError('Database integrity check failed')
+            tables={r[0] for r in src.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            if not {'pairs','observations'}.issubset(tables):
+                raise RuntimeError('History database schema is missing; refusing an empty reset')
+            with tempfile.NamedTemporaryFile(prefix='.flight-backup-', dir=destination.parent,
+                                             delete=False) as handle:
+                temporary = Path(handle.name)
+            with closing(sqlite3.connect(temporary)) as dst:
+                src.backup(dst)
+                if dst.execute('PRAGMA integrity_check').fetchall() != [('ok',)]:
+                    raise RuntimeError('Backup database integrity check failed')
+        # Replace only after the complete, validated backup has closed. A failed
+        # restore leaves neither a new empty destination nor a damaged old one.
+        with temporary.open('rb') as handle:
+            os.fsync(handle.fileno())
+        os.replace(temporary, destination)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 def main(mode):

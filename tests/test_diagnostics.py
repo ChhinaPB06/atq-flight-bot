@@ -32,4 +32,8 @@ class DiagnosticsTests(unittest.TestCase):
         self.assertEqual(len(offers),1)
         self.assertEqual(report['rejected']['both_directions_over_31h'],1)
 
+    def test_malformed_api_payload_is_parser_failure_not_provider_outage(self):
+        from providers.serpapi import ProviderDataError
+        self.assertEqual(t.classify_failure(ProviderDataError('Malformed provider payload')),'parser_error')
+
 if __name__=='__main__': unittest.main()

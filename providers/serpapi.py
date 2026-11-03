@@ -1,17 +1,28 @@
 """Optional maintained API candidate. No billing enrollment or booking support."""
 from datetime import datetime, timezone
+from collections import Counter
 import json
+from math import ceil
 import os
+import re
 from providers.timezones import airport_zone, RULES_VERSION
 from urllib.parse import urlencode
 from urllib.request import urlopen
-from urllib.error import HTTPError
+from urllib.error import HTTPError,URLError
 
 
-class ProviderAccessError(RuntimeError):pass
+class ProviderAccessError(RuntimeError):
+    def __init__(self,message,status_code=None):
+        super().__init__(message)
+        self.status_code=status_code
 class BudgetExhausted(RuntimeError):pass
 class ProviderRateLimit(ProviderAccessError):pass
-class ProviderDataError(RuntimeError):pass
+class ProviderBlocked(ProviderAccessError):pass
+class ProviderTimeout(ProviderAccessError):pass
+class ProviderDataError(RuntimeError):
+    def __init__(self,message,reason='parser_error'):
+        super().__init__(message)
+        self.reason=reason
 
 
 def reserve(con,now=None,daily_limit=8):
@@ -33,33 +44,80 @@ def reserve(con,now=None,daily_limit=8):
 
 
 def rows(payload):
+    if not isinstance(payload,dict):raise ProviderDataError('Provider payload is not an object')
     if payload.get('error'):
         message=str(payload['error']).lower()
-        if any(text in message for text in ("hasn't returned any results",'has not returned any results','no results found','no flights found')):
-            return []  # No usable provider data; not proof of no inventory.
         if any(text in message for text in ('quota','rate limit','hourly limit','run out of searches','too many requests')):
             raise ProviderRateLimit('Provider search quota or rate limit reached')
+        if any(text in message for text in ("hasn't returned any results",'has not returned any results','no results found','no flights found')):
+            return []  # No usable provider data; not proof of no inventory.
         raise ProviderDataError('Provider reported an unclassified API error')
-    if payload.get('search_parameters',{}).get('currency')!='CAD':
+    parameters=payload.get('search_parameters')
+    if not isinstance(parameters,dict) or parameters.get('currency')!='CAD':
         raise ProviderDataError('Returned search currency is not CAD')
-    return [*payload.get('best_flights',[]),*payload.get('other_flights',[])]
+    result=[]
+    for key in ('best_flights','other_flights'):
+        items=payload.get(key,[])
+        if not isinstance(items,list):raise ProviderDataError('Provider itinerary collection is not a list')
+        result.extend(items)
+    return result
+
+
+def diagnostic_status(offers,report):
+    """Distinguish empty selected returns from rejected initial outbounds."""
+    if offers:return 'eligible_found'
+    returning='return_rows' in report
+    count=report.get('return_rows' if returning else 'outbound_rows',0)
+    if not count:return 'empty_response'
+    reasons=report.get('return_rejection_reasons' if returning else 'outbound_rejection_reasons',{})
+    if reasons.get('parser_error',0)+reasons.get('missing_departure_token',0)>0:
+        return 'parser_error'
+    return 'all_rejected'
 
 
 def journey(item,origin,destination,day):
-    flights=item.get('flights') or []
+    if not isinstance(item,dict):raise ProviderDataError('Provider itinerary is not an object')
+    flights=item.get('flights')
+    if not isinstance(flights,list) or not flights or any(not isinstance(f,dict) for f in flights):
+        raise ProviderDataError('Provider flights are missing or malformed')
     duration=item.get('total_duration')
-    if isinstance(duration,bool) or not isinstance(duration,int) or not 0<duration<=1860:
-        raise ProviderDataError('Invalid or over-limit whole-journey duration')
-    if not flights or flights[0].get('departure_airport',{}).get('id')!=origin or flights[-1].get('arrival_airport',{}).get('id')!=destination:
-        raise ProviderDataError('Wrong journey endpoints')
-    if flights[0].get('departure_airport',{}).get('time','')[:10]!=day:
-        raise ProviderDataError('Wrong journey date')
-    if item.get('type')!='Round trip' or any(f.get('travel_class')!='Economy' for f in flights):
-        raise ProviderDataError('Trip type or cabin is unverified')
-    start=datetime.fromisoformat(flights[0]['departure_airport']['time']).replace(tzinfo=airport_zone(origin))
-    end=datetime.fromisoformat(flights[-1]['arrival_airport']['time']).replace(tzinfo=airport_zone(destination))
-    elapsed=int((end.astimezone(timezone.utc)-start.astimezone(timezone.utc)).total_seconds()/60)
-    if not 0<elapsed<=1860:raise ProviderDataError('Actual elapsed journey exceeds limit')
+    if isinstance(duration,bool) or not isinstance(duration,int) or duration<=0:
+        raise ProviderDataError('Invalid whole-journey duration')
+    if duration>1860:raise ProviderDataError('Whole-journey duration exceeds limit','duration_limit')
+    if item.get('type')!='Round trip':raise ProviderDataError('Trip type is unverified','trip_type_unverified')
+    if any(f.get('travel_class')!='Economy' for f in flights):
+        raise ProviderDataError('Cabin is unverified','cabin_unverified')
+    times=[]
+    for flight in flights:
+        endpoints=[]
+        for key in ('departure_airport','arrival_airport'):
+            airport=flight.get(key)
+            if not isinstance(airport,dict) or not isinstance(airport.get('id'),str) or not re.fullmatch(r'[A-Z]{3}',airport['id']):
+                raise ProviderDataError('Flight airport is malformed')
+            stamp=airport.get('time')
+            if not isinstance(stamp,str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2})?',stamp):
+                raise ProviderDataError('Airport-local timestamp is malformed or offset-bearing')
+            try:parsed=datetime.fromisoformat(stamp)
+            except ValueError:raise ProviderDataError('Airport-local timestamp is invalid') from None
+            endpoints.append(parsed)
+        times.append(endpoints)
+    if flights[0]['departure_airport']['id']!=origin or flights[-1]['arrival_airport']['id']!=destination:
+        raise ProviderDataError('Wrong journey endpoints','route_or_date_mismatch')
+    if flights[0]['departure_airport']['time'][:10]!=day:
+        raise ProviderDataError('Wrong journey date','route_or_date_mismatch')
+    for index,(previous,current) in enumerate(zip(flights,flights[1:])):
+        if previous['arrival_airport']['id']!=current['departure_airport']['id']:
+            raise ProviderDataError('Disconnected journey legs','route_or_date_mismatch')
+        # The layover endpoints share one airport, hence one local timezone.
+        # Do not infer flying time between different airport-local clocks.
+        if times[index][1]>times[index+1][0]:
+            raise ProviderDataError('Connection departs before arrival','route_or_date_mismatch')
+    start=times[0][0].replace(tzinfo=airport_zone(origin))
+    end=times[-1][1].replace(tzinfo=airport_zone(destination))
+    elapsed_seconds=(end.astimezone(timezone.utc)-start.astimezone(timezone.utc)).total_seconds()
+    if elapsed_seconds<=0:raise ProviderDataError('Actual elapsed journey is invalid','route_or_date_mismatch')
+    if elapsed_seconds>1860*60:raise ProviderDataError('Actual elapsed journey exceeds limit','duration_limit')
+    elapsed=ceil(elapsed_seconds/60)
     duration=max(duration,elapsed)  # Conservative if provider and local-time reconstruction differ.
     return duration,[{'airline':f.get('airline'),'number':f.get('flight_number'),
         'from':f['departure_airport']['id'],'to':f['arrival_airport']['id'],
@@ -78,13 +136,22 @@ class Client:
         try:
             with urlopen(url,timeout=30) as response:return json.load(response)
         except HTTPError as exc:
-            if exc.code==429:raise ProviderRateLimit('Provider quota or rate limit reached') from None
-            raise ProviderAccessError('Provider HTTP access failed') from None
+            if exc.code==429:raise ProviderRateLimit('Provider quota or rate limit reached',exc.code) from None
+            if exc.code in (403,451):raise ProviderBlocked('Provider access blocked or denied',exc.code) from None
+            raise ProviderAccessError('Provider HTTP access failed',exc.code) from None
+        except (json.JSONDecodeError,UnicodeDecodeError):
+            raise ProviderDataError('Provider response is not valid JSON') from None
+        except TimeoutError:
+            raise ProviderTimeout('Provider request timed out') from None
+        except URLError as exc:
+            if isinstance(exc.reason,TimeoutError):raise ProviderTimeout('Provider request timed out') from None
+            raise ProviderAccessError('Provider transport access failed') from None
         except Exception:
             raise ProviderAccessError('Provider request failed; credentials and URLs withheld') from None
 
     def check_access(self):
         account=self.request('account.json',{})
+        if not isinstance(account,dict):raise ProviderAccessError('Provider account response is malformed')
         self.account_metadata={k:account.get(k) for k in ('plan_name','plan_id','plan_monthly_price','searches_per_month','total_searches_left')}
         self.account_metadata['field_names']=sorted(account)
         if account.get('plan_id')!='free' or str(account.get('plan_monthly_price')) not in ('0','0.0','0.00'):
@@ -101,34 +168,51 @@ class Client:
                 'outbound_date':depart,'return_date':return_date,'currency':'CAD',
                 'adults':1,'travel_class':1,'type':1,'hl':'en','gl':'ca'}
         outbound_payload=self.request('search.json',params)
-        candidates=sorted(rows(outbound_payload),key=lambda item: item.get('price') if type(item.get('price')) is int and item['price']>0 else float('inf'))
-        selected=None
+        candidates=sorted(rows(outbound_payload),key=lambda item: item.get('price') if isinstance(item,dict) and type(item.get('price')) is int and item['price']>0 else float('inf'))
+        selected=None;out_reasons=Counter()
         for item in candidates:
             try:out_duration,out_legs=journey(item,'YYC','ATQ',depart)
-            except ProviderDataError:continue
-            if item.get('departure_token'):
+            except ProviderDataError as exc:
+                out_reasons[exc.reason]+=1;continue
+            if isinstance(item.get('departure_token'),str) and item['departure_token']:
                 selected=item;break
+            out_reasons['missing_departure_token']+=1
         if selected is None:
             # The second HTTP call is provably not made; this is unused local
             # capacity, not a refund of an ambiguous or provider-billed failure.
             con.execute('UPDATE serpapi_usage SET searches=1 WHERE rowid=? AND searches=2',(reservation,))
             con.commit()
-            return [],{'status':'no_usable_outbound','outbound_rows':len(candidates),'requests_made':1}
+            report={'status':'no_usable_outbound','outbound_rows':len(candidates),'requests_made':1,
+                    'rejected_outbounds':sum(out_reasons.values()),'outbound_rejection_reasons':dict(out_reasons)}
+            report['provider_status']=diagnostic_status([],report)
+            return [],report
         returns=rows(self.request('search.json',{**params,'departure_token':selected['departure_token']}))
-        offers=[];rejected=0
+        offers=[];rejected=Counter()
         for item in returns:
             try:
                 back_duration,back_legs=journey(item,'ATQ','YYC',return_date)
                 price=item.get('price')
-                if isinstance(price,bool) or not isinstance(price,int) or price<=0:raise ProviderDataError('Invalid total price')
+                if isinstance(price,bool) or not isinstance(price,int) or price<=0:
+                    raise ProviderDataError('Invalid total price','price_unverified')
                 # Unknown separate-ticket/self-transfer semantics stay unverified.
-                if any('separate ticket' in str(x).lower() for x in [*selected.get('extensions',[]),*item.get('extensions',[])]):
-                    raise ProviderDataError('Separate tickets require alternative-offer handling')
+                extensions=[]
+                for part in (selected,item):
+                    values=part.get('extensions',[])
+                    if values is None:values=[]
+                    if not isinstance(values,list) or any(not isinstance(v,str) for v in values):
+                        raise ProviderDataError('Provider ticket extensions are malformed')
+                    extensions.extend(values)
+                if any('separate ticket' in x.lower() for x in extensions):
+                    raise ProviderDataError('Separate tickets require alternative-offer handling','separate_tickets_unverified')
                 offers.append({'price_cad':price,'currency':'CAD','outbound_min':out_duration,
                     'inbound_min':back_duration,'outbound':out_legs,'return':back_legs,
                     'source':'serpapi_google_flights','ticket_type':'provider_round_trip_quote',
                     'timezone_rules':RULES_VERSION,
                     'verification':'api_search_not_checkout'})
-            except ProviderDataError:rejected+=1
-        return offers,{'status':'eligible_found' if offers else 'no_usable_return',
-            'outbound_rows':len(candidates),'return_rows':len(returns),'rejected_returns':rejected}
+            except ProviderDataError as exc:rejected[exc.reason]+=1
+        report={'status':'eligible_found' if offers else 'no_usable_return',
+            'outbound_rows':len(candidates),'return_rows':len(returns),'rejected_returns':sum(rejected.values()),
+            'rejected_outbounds':sum(out_reasons.values()),'outbound_rejection_reasons':dict(out_reasons),
+            'return_rejection_reasons':dict(rejected)}
+        report['provider_status']=diagnostic_status(offers,report)
+        return offers,report

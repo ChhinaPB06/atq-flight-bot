@@ -99,3 +99,15 @@ follow README setup. Agent instructions guide future turns when this checkout is
 loaded; they do not create an unattended background agent or change system tools.
 
 Current API policy: initial54pairpass uses at most18pairs/trigger,40searches/rollinghour,120/day and240/month. After first-pass attempts complete, dailycap4searches allows2pairs/day. Provider Free-plan/zero-price/remaining-quota gates remain mandatory. Preserve quota and api_pair_checks in persisted fare DB. Initial batches must not be described as a fresh full grid every4hours.
+
+## Authorized specialist coordination
+
+The user authorized six parallel specialists for this mission. Assign exclusive
+files before editing and keep one coordinator responsible for integration, Git
+operations and deployment. Specialists must not independently issue fare calls,
+create quota ledgers, enable paid tools, or duplicate live experiments. All share
+the same persisted provider allowance. Review source changes together, run one
+combined validation after integration, and preserve independent acceptance evidence.
+Agent sessions are not unattended services; the four-hour workflow is the
+scheduled service. Finish at an evidenced acceptance result or concrete external
+blocker, not merely a count of passing tests or agents.

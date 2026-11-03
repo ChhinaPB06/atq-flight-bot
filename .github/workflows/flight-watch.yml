@@ -58,6 +58,7 @@ jobs:
       - name: Select isolated history path
         run: echo "FLIGHT_DB=$RUNNER_TEMP/flight-state/fares.sqlite3" >> "$GITHUB_ENV"
       - name: Restore durable history
+        id: restore_history
         run: python scripts/persist_state.py restore
       - name: Flight watch task
         env:
@@ -80,7 +81,7 @@ jobs:
             *) echo 'Invalid task'; exit 2 ;;
           esac
       - name: Persist history independently of code branches
-        if: always()
+        if: always() && steps.restore_history.outcome == 'success'
         run: |
           if [ -f "$FLIGHT_DB" ]; then
             python scripts/persist_state.py save
