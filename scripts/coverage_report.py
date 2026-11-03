@@ -6,10 +6,10 @@ import json
 from pathlib import Path
 import sqlite3
 import sys
-from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import tracker
+from providers.timezones import airport_zone, RULES_VERSION
 
 
 def audit_quote(row):
@@ -23,7 +23,7 @@ def audit_quote(row):
     require(row['verification'] == 'live_search_not_checkout', 'verification')
     require(type(quote['price_cad']) is int and quote['price_cad'] > 0, 'price')
     require(row['price_cad'] == quote['price_cad'], 'stored_price')
-    zones = {'YYC': ZoneInfo('America/Edmonton'), 'ATQ': ZoneInfo('Asia/Kolkata')}
+    zones = {iata: airport_zone(iata) for iata in ('YYC','ATQ')}
     for key, origin, destination, day, duration_key in (
         ('outbound', 'YYC', 'ATQ', row['depart'], 'outbound_min'),
         ('return', 'ATQ', 'YYC', row['return_date'], 'inbound_min'),
@@ -76,7 +76,8 @@ def collect(con):
     now = datetime.now(timezone.utc)
     fresh = sum(bool(r['price_observed_at']) and
                 now-timedelta(hours=4) <= datetime.fromisoformat(r['price_observed_at']) <= now for r in rows)
-    return {'generated_at': now.isoformat(), 'integrity': con.execute('PRAGMA integrity_check').fetchone()[0],
+    return {'generated_at': now.isoformat(), 'timezone_rules':RULES_VERSION,
+        'integrity': con.execute('PRAGMA integrity_check').fetchone()[0],
         'expected_pairs': len(expected), 'exact_date_grid': actual == expected,
         'pairs_attempted': attempted, 'attempted_pct': round(100*attempted/len(expected),1),
         'pairs_with_observed_quotes': sum(r['latest_observed_price_cad'] is not None for r in rows),

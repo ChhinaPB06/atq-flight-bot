@@ -2,7 +2,7 @@
 from datetime import datetime, timezone
 import json
 import os
-from zoneinfo import ZoneInfo
+from providers.timezones import airport_zone, RULES_VERSION
 from urllib.parse import urlencode
 from urllib.request import urlopen
 from urllib.error import HTTPError
@@ -56,9 +56,8 @@ def journey(item,origin,destination,day):
         raise ProviderDataError('Wrong journey date')
     if item.get('type')!='Round trip' or any(f.get('travel_class')!='Economy' for f in flights):
         raise ProviderDataError('Trip type or cabin is unverified')
-    zones={'YYC':'America/Edmonton','ATQ':'Asia/Kolkata'}
-    start=datetime.fromisoformat(flights[0]['departure_airport']['time']).replace(tzinfo=ZoneInfo(zones[origin]))
-    end=datetime.fromisoformat(flights[-1]['arrival_airport']['time']).replace(tzinfo=ZoneInfo(zones[destination]))
+    start=datetime.fromisoformat(flights[0]['departure_airport']['time']).replace(tzinfo=airport_zone(origin))
+    end=datetime.fromisoformat(flights[-1]['arrival_airport']['time']).replace(tzinfo=airport_zone(destination))
     elapsed=int((end.astimezone(timezone.utc)-start.astimezone(timezone.utc)).total_seconds()/60)
     if not 0<elapsed<=1860:raise ProviderDataError('Actual elapsed journey exceeds limit')
     duration=max(duration,elapsed)  # Conservative if provider and local-time reconstruction differ.
@@ -128,6 +127,7 @@ class Client:
                 offers.append({'price_cad':price,'currency':'CAD','outbound_min':out_duration,
                     'inbound_min':back_duration,'outbound':out_legs,'return':back_legs,
                     'source':'serpapi_google_flights','ticket_type':'provider_round_trip_quote',
+                    'timezone_rules':RULES_VERSION,
                     'verification':'api_search_not_checkout'})
             except ProviderDataError:rejected+=1
         return offers,{'status':'eligible_found' if offers else 'no_usable_return',

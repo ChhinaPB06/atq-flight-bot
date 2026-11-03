@@ -11,6 +11,18 @@ def flight(origin,destination,day,price=2500,duration=1800):
 
 
 class SerpApiTests(unittest.TestCase):
+    def test_pinned_rules_handle_calgary_january_2027_offset(self):
+        from providers.timezones import airport_zone,RULES_VERSION
+        self.assertEqual(RULES_VERSION,'2026.6')
+        self.assertEqual(datetime(2027,1,27,12,tzinfo=airport_zone('YYC')).utcoffset(),timedelta(hours=-6))
+
+    def test_underreported_duration_cannot_hide_current_rule_31_hour_violation(self):
+        from providers.serpapi import journey,ProviderDataError
+        item=flight('YYC','ATQ','2027-01-27',duration=1860)
+        item['flights'][0]['arrival_airport']['time']='2027-01-29 07:00'
+        # Old Calgary winter rules gave 30h30; pinned current rules give 31h30.
+        with self.assertRaises(ProviderDataError):journey(item,'YYC','ATQ','2027-01-27')
+
     def test_paid_account_cannot_search(self):
         calls=[]
         def request(path,params):calls.append(path);return {'plan_name':'Developer','total_searches_left':100}

@@ -40,6 +40,7 @@ jobs:
           "$RUNNER_TEMP/stable/bin/pip" install -r requirements.txt
           python -m venv "$RUNNER_TEMP/upstream"
           "$RUNNER_TEMP/upstream/bin/pip" install 'git+https://github.com/punitarani/fli.git@881aee5ff4321e81ea2157cb44be94ce6a21dc1b'
+          "$RUNNER_TEMP/upstream/bin/pip" install -r requirements-timezones.txt
           phase=playwright_package
           "$RUNNER_TEMP/upstream/bin/pip" install 'playwright==1.58.0'
           phase=browser_system_dependencies

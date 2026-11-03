@@ -367,3 +367,23 @@ Collect per-pair dates, check timestamps, statuses and price in sanitized eviden
 Empty/filtered results keep degraded workflow status; do not equate completed
 attempts with valid quotes or fresh all-grid coverage. Run offline suite first.
 Native-email end-to-end gate remains blocked on approved real exported email.
+
+E019 result:run41654025980 attempted all16remainingpairs; cumulative54/54,
+44usable,5empty/unverified,5validation-filtered. Batch visiblydegraded, history
+116→147andallpriorrows retained, integrityok, reservations112.44/54=81.5%usable
+farecoverage. Snapshot14:37UTC has25pairs withquoteswithin4hours. No newpaidsource,
+noaccountpolicychange, noTelegram. All54attempted is not all54freshorall54priced.
+
+## E020 — reproduce and fix timezone-dependent audit failure
+
+RemoteCI41654833453 failed newstored-quote audit fixture despite localpass.
+Inspector41655626508 isolated the failing test. Same-image diagnostic41656060926
+established YYCJanuary2027UTC-6 on the runner versus cloudsystemtzdata2026bUTC-7.
+Do not hide the difference by weakening the31hourfilter or pinning staleOSdata.
+Verified officialPyPIlatesttzdata2026.6/IANA2026f; explicitly load its airport
+zonefiles in scanner/audit, include timezone_rules in newquotes, and install the
+same pinnedpackage in stable/upstream workflows. Fixture corrected to1110min;
+newregression proves an itinerary oldrules read as30h30is31h30under currentrules
+and mustberejected.58tests pass locallyperversion. Currentrules audit all134
+activepairAPIobservations passes; previousbestCAD2074 remainsvalid. No oldquote
+or quota ledger was modified and no extra fare request was used for the fix.

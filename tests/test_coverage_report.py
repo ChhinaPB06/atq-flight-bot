@@ -22,7 +22,7 @@ class CoverageReportTests(unittest.TestCase):
 
     def test_persisted_quote_rechecked_and_corruption_detected(self):
         quote={'currency':'CAD','ticket_type':'provider_round_trip_quote','price_cad':2200,
-            'outbound_min':1050,'inbound_min':810,'source':'serpapi_google_flights',
+            'outbound_min':1110,'inbound_min':810,'source':'serpapi_google_flights',
             'outbound':[{'from':'YYC','to':'ATQ','depart_at':'2027-01-27 12:00',
                          'arrive_at':'2027-01-28 18:00'}],
             'return':[{'from':'ATQ','to':'YYC','depart_at':'2027-04-20 12:00',

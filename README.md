@@ -15,7 +15,7 @@ They do not independently measure nights spent after arrival in India.
 
 ## Current operation
 
-The tested code is on **main**. The `Personal YYC–ATQ Flight Watch` Actions workflow
+The scheduled API scanner is deployed on **main**. The `Personal YYC–ATQ Flight Watch` Actions workflow
 runs on cron `23 */4 * * *` (every4hours). GitHub may delay scheduled execution.
 Workflow configuration changes on main can also start one operational run.
 Ordinary source/documentation pushes do not issue flight searches.
@@ -32,6 +32,9 @@ single airline ticket, availability at checkout, bags or final seller charges.
 Durations use the greater of the provider's whole-journey total and elapsed time
 reconstructed from YYC/ATQ airport-local endpoints and timezones. This conservative
 check includes layovers; it never merely sums flying times.
+Both the scanner and audit explicitly load pinned `tzdata==2026.6` (IANA2026f),
+instead of relying on potentially different host OS rules. This matters because
+older Calgary winter rules differ from the current rules for January2027.
 
 ## Free quota and whole-grid coverage
 
@@ -126,7 +129,8 @@ records only the user's reported checkout observation, never an independent chec
   active first-pass coverage6/54 before the main sweep.
 - Best observed at that checkpoint: **CAD2245,Jan27–Apr20**,83days,
   **25h25m outbound /28h10m return**, search quote only. New scans may change it.
-- **45offline tests** and actionlint pass. Tests alone are not live fare proof.
+- **58offline tests** and actionlint pass on the development branch. Tests alone
+  are not live fare proof; check the linked run evidence for remote validation.
 
 Inspect Actions summaries, LIVE DIAGNOSTIC, COVERAGE, saved history and the
 flight-provider-evidence branch. Run `python tracker.py status` against a restored
@@ -137,4 +141,36 @@ created because repository policy disallowed Actions PR creation; normal
 fast-forward main activation was used for the user's requested live schedule.
 No force push or account-permission change occurred.
 
-Latest operational checkpoint:20/54pairs checked,19with usable quotes and1no-data result;34remain. BestobservedCAD2074 Jan29–Apr21,82days,30h10outbound/28h22return. PreferredJan27 bestCAD2233 returningApr23. Run41590235586 correctly marked degraded for the no-data pair while preserving all progress; rollinghour quota then deferred further checks. The active four-hour schedule continues remaining work. These prices are not checkout-confirmed.
+## Reproduce the complete coverage audit
+
+The development branch includes a read-only report of every active date pair:
+
+```sh
+python scripts/coverage_report.py --db /path/to/restored/fares.sqlite3 --csv /path/to/54-pair-results.csv > /path/to/coverage-audit.json
+```
+
+It reports exact date-grid membership, cumulative attempts, quote timestamps,
+four-hour quote freshness, provider/status, CAD prices, durations and search links.
+It independently rechecks stored API quotes against currency, route/date,
+connection and elapsed-duration constraints. It issues no provider request and
+does not modify the database or spend credits. A successful audit validates stored
+facts; it does not mean every pair has a quote, all prices are fresh, Telegram
+worked, or checkout was confirmed.
+
+The native email pilot is also on the development branch, separately from the
+deployed API scanner. Its tests use synthetic messages. Actual Google alert
+ingestion and all 54 native watches have not been demonstrated. Follow
+[the pilot setup](research/NATIVE_ALERT_PILOT.md) for the required real sample;
+no mailbox connector or recurring inbox ingestion is currently configured.
+
+Latest completed initial pass: **54/54 pairs attempted**, **44 with usable fares**,
+five provider-empty/unverified and five with returned fares rejected by validation.
+Run41654025980 added31observations (116→147), preserved previous history, and
+saved an intact database. It correctly failed as degraded for the unusable results.
+An audit of134active-pair APIobservations under pinned current rules found no
+invalid stored quote. Best observed remainsCAD2074 Jan29–Apr21,82days,
+30h10outbound/28h22return, observed2026-11-03at06:31:27UTC, not checkout-confirmed.
+This is cumulative coverage; only25pairs had quotes observed within4hours at the
+14:37UTCsnapshot. Five empty responses do not prove unavailable flights, and
+five filtered responses concern the selected outbound's return options, not an
+exhaustive rejection of every possible airline itinerary for those dates.

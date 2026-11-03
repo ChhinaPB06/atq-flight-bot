@@ -1,5 +1,29 @@
 # Flight bot status and decision log
 
+## Current checkpoint — all 54 attempted; native integration remains incomplete
+
+Run41654025980 completed the initial attempt pass:54/54datepairs,44with usable
+fares,5provider-empty/unverified,5with returned fares rejected by validation.
+No unchecked pairs remain. The batch correctly reported degraded status and
+persisted progress. Observations116→147; every prior observation is preserved;
+SQLite integrityok;112reserved searches total. Per-pair CSV/audit are generated
+with scripts/coverage_report.py, which performs no network request or DB mutation.
+25pairs had a quote within4hours at14:37UTC; cumulative attempts are not freshness.
+
+Remote58test validation is being run after a reproduced timezone portability
+defect: host Calgary January2027offset differed between cloud/Ubuntu images.
+Scanner/audit now explicitly use tzdata2026.6/IANA2026f. All134active-pair stored
+quotes pass the current-rule audit, so best remainsCAD2074 Jan29/Apr21,
+1810/1702minutes, observed06:31:27UTC. Not checkout-confirmed; no<=1900quote.
+58local tests pass per Fli version, including a case that older rules would
+wrongly admit as<=31hours. Remote CI result must be observed before calling it passed.
+
+Native Google email ingestion remains untested against a real exported alert;
+no inbox integration or54enabled watches has been demonstrated. Telegram is
+deferred. Free quota cannot support fresh detailed54pairchecks every4hours.
+No real PR exists because repository Actions PR creation is disabled.
+The complete project therefore is not fully ready or acceptance-complete.
+
 ## Acceptance status
 
 Engineering work is **in progress, externally blocked**, not complete. No new live

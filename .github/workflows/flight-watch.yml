@@ -50,6 +50,7 @@ jobs:
             pip install -r requirements.txt
           else
             pip install 'git+https://github.com/punitarani/fli.git@881aee5ff4321e81ea2157cb44be94ce6a21dc1b'
+            pip install -r requirements-timezones.txt
           fi
           python -c 'import fli; print("Installed Fli from:", fli.__file__)'
       - name: Offline unit tests
