@@ -1,0 +1,42 @@
+name: Personal YYC–ATQ Level 2 Flight Watch
+on:
+  schedule:
+    - cron: '23 */4 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: personal-flight-watch
+  cancel-in-progress: false
+jobs:
+  scan:
+    # Private repo recommended: stores trip and fare history; GitHub Free minutes apply.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Fli
+        run: pip install -r requirements.txt
+      - name: Scan
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          CALENDAR_PER_RUN: '2'
+          LIVE_PER_RUN: '1'
+          PAUSE_SECONDS: '10'
+        run: python tracker.py scan
+      - name: Save persistent SQLite history (private repository)
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add state/fares.sqlite3
+          if ! git diff --cached --quiet; then
+            git commit -m 'Persist flight watch state [skip ci]'
+            git push
+          fi
