@@ -31,7 +31,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      FLIGHT_DB: ${{ runner.temp }}/flight-state/fares.sqlite3
       FLI_TIMEOUT: "30"
     steps:
       - uses: actions/checkout@v5
@@ -52,6 +51,8 @@ jobs:
           python -c 'import fli; print("Installed Fli from:", fli.__file__)'
       - name: Offline unit tests
         run: python -m unittest discover -s tests -v
+      - name: Select isolated history path
+        run: echo "FLIGHT_DB=$RUNNER_TEMP/flight-state/fares.sqlite3" >> "$GITHUB_ENV"
       - name: Restore durable history
         run: python scripts/persist_state.py restore
       - name: Flight watch task

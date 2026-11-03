@@ -8,6 +8,7 @@ on:
       - scripts/provider_experiment.py
 permissions:
   contents: write
+  actions: read
 concurrency:
   group: provider-experiment
   cancel-in-progress: false
@@ -17,18 +18,31 @@ jobs:
     timeout-minutes: 10
     env:
       FLI_TIMEOUT: '15'
+      # Recover completed experiment evidence without repeating provider traffic.
+      RECOVER_RUN_ID: '41578099055'
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - name: Recover completed comparison artifact
+        if: env.RECOVER_RUN_ID != ''
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ env.RECOVER_RUN_ID }}
+          pattern: provider-experiment-*
+          merge-multiple: true
+          path: ${{ runner.temp }}/provider-evidence
       - name: Prepare isolated provider versions
+        if: env.RECOVER_RUN_ID == ''
         run: |
           python -m venv "$RUNNER_TEMP/stable"
           "$RUNNER_TEMP/stable/bin/pip" install -r requirements.txt
           python -m venv "$RUNNER_TEMP/upstream"
           "$RUNNER_TEMP/upstream/bin/pip" install 'git+https://github.com/punitarani/fli.git@881aee5ff4321e81ea2157cb44be94ce6a21dc1b'
       - name: Compare one exact round trip
+        if: env.RECOVER_RUN_ID == ''
         id: compare
         run: |
           mkdir -p "$RUNNER_TEMP/provider-evidence"
@@ -52,8 +66,8 @@ jobs:
           target="$RUNNER_TEMP/evidence-git"
           mkdir "$target"
           git init "$target"
-          git -C "$target" config include.path "$GITHUB_WORKSPACE/.git/config"
           git -C "$target" remote add origin "$(git remote get-url origin)"
+          git -C "$target" config include.path "$GITHUB_WORKSPACE/.git/config"
           existing=$(git -C "$target" ls-remote --heads origin refs/heads/flight-provider-evidence)
           if [ -n "$existing" ]; then
             git -C "$target" fetch --depth=1 origin flight-provider-evidence
@@ -63,7 +77,8 @@ jobs:
           fi
           mkdir -p "$target/runs/$EXPERIMENT_RUN"
           cp "$evidence/"*.json "$target/runs/$EXPERIMENT_RUN/"
-          printf '%s\n' "$GITHUB_SHA" > "$target/runs/$EXPERIMENT_RUN/source-commit.txt"
+          printf '%s\n' "$GITHUB_SHA" > "$target/runs/$EXPERIMENT_RUN/publisher-commit.txt"
+          printf '%s\n' "${RECOVER_RUN_ID:-$GITHUB_RUN_ID}" > "$target/runs/$EXPERIMENT_RUN/source-run.txt"
           git -C "$target" config user.name 'github-actions[bot]'
           git -C "$target" config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git -C "$target" add runs

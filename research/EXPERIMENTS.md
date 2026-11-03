@@ -82,3 +82,17 @@ next action. Never put secret values or raw authenticated request URLs here.
 - Acceptance: only usable_live_quote with real validated fare fields advances the
   live gate; empty/blocked/unrun remains failure/inconclusive. No notifications,
   production DB mutations or paid services. API/CI availability is not assumed.
+
+### E005 first remote outcome and evidence recovery
+
+- GitHub HTML pages expose run metadata despite API denial. Offline matrix run
+  41578099204 passed both versions. Live experiment 41578099055 ran and failed;
+  its evidence publishing step failed separately with exit 3. Logs require login.
+- Publishing defect diagnosed from code: including checkout config defines origin
+  before remote add, causing duplicate-remote failure. Corrected operation order.
+- Recover the existing artifact through Actions' scoped token, then publish it;
+  RECOVER_RUN_ID is pinned to the original run. This avoids repeating flight
+  requests just to repair evidence transport. Recovery success is not live success.
+- Also corrected an earlier job-level runner.temp expression rejected by GitHub
+  (run 41578097686). Use GITHUB_ENV at step runtime instead. Official actionlint
+  v1.7.7 release checksum verified; all three workflows pass its expression check.
