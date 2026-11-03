@@ -1,1 +1,1 @@
-flights>=1.0
+flights==0.9.0

@@ -35,7 +35,9 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add state/fares.sqlite3
+          if [ -f state/fares.sqlite3 ]; then
+            git add state/fares.sqlite3
+          fi
           if ! git diff --cached --quiet; then
             git commit -m 'Persist flight watch state [skip ci]'
             git push
