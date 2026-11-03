@@ -1,8 +1,26 @@
-name: Personal YYC–ATQ Level 2 Flight Watch
+name: Personal YYC–ATQ Flight Watch (health + diagnostics)
 on:
   schedule:
     - cron: '23 */4 * * *'
   workflow_dispatch:
+    inputs:
+      task:
+        description: 'What to run'
+        required: true
+        default: scan
+        type: choice
+        options:
+          - scan
+          - health
+          - test-telegram
+      fli_channel:
+        description: 'Pinned upstream Fli (repair experiment) or stable PyPI 0.9.0'
+        required: true
+        default: upstream
+        type: choice
+        options:
+          - upstream
+          - stable
 permissions:
   contents: write
 concurrency:
@@ -10,27 +28,44 @@ concurrency:
   cancel-in-progress: false
 jobs:
   scan:
-    # Private repo recommended: stores trip and fare history; GitHub Free minutes apply.
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: true
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Install Fli
-        run: pip install -r requirements.txt
-      - name: Scan
+      - name: Install selected Fli revision
         env:
+          FLI_CHANNEL: ${{ inputs.fli_channel || 'upstream' }}
+        run: |
+          if [ "$FLI_CHANNEL" = 'stable' ]; then
+            pip install -r requirements.txt
+          else
+            pip install 'git+https://github.com/punitarani/fli.git@881aee5ff4321e81ea2157cb44be94ce6a21dc1b'
+          fi
+          python -c 'import fli; print("Installed Fli from:", fli.__file__)'
+      - name: Offline unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Flight watch task
+        env:
+          TASK: ${{ inputs.task || 'scan' }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TRAVELPAYOUTS_TOKEN: ${{ secrets.TRAVELPAYOUTS_TOKEN }}
           CALENDAR_PER_RUN: '2'
           LIVE_PER_RUN: '2'
           PAUSE_SECONDS: '10'
-        run: python tracker.py scan
-      - name: Save persistent SQLite history (private repository)
+        run: |
+          case "$TASK" in
+            scan) python tracker.py scan ;;
+            health) python tracker.py health ;;
+            test-telegram) python tracker.py test-telegram ;;
+            *) echo 'Invalid task'; exit 2 ;;
+          esac
+      - name: Save scan diagnostics and SQLite history
         if: always()
         run: |
           git config user.name 'github-actions[bot]'
@@ -39,6 +74,6 @@ jobs:
             git add state/fares.sqlite3
           fi
           if ! git diff --cached --quiet; then
-            git commit -m 'Persist flight watch state [skip ci]'
+            git commit -m 'Persist fare history and provider health [skip ci]'
             git push
           fi

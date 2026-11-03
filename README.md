@@ -60,3 +60,54 @@ The implementation uses **Fli** only as its external flight-search engine, plus 
 ## Diagnostic update (Nov 2026)
 
 The live search now expands five outbound candidates and logs a JSON `LIVE DIAGNOSTIC` with raw returned pair count, eligible count, and rejection reasons: missing/invalid total price, missing duration, over-31-hour outbound/return/both, and unexpected provider data structure. A provider exception fails the job instead of masquerading as a successful search. `empty_response` does **not** prove there are no flights. Two live date-pairs are checked per four-hour run, so 216 independent live searches still take at least ~18 days with six runs per day (if no dates are prioritized again), not four hours. Calendar coverage is separate and faster. The full checkout price remains manually verifiable only.
+
+---
+
+## Phases 1–4: Provider health, alternative source, complete coverage, and alert validation
+
+This release adds a **provider-health gate**. A green job means the search was not silently broken; a red `SCAN DEGRADED` status means investigate logs, not "no flights". The source can still miss offers even when healthy.
+
+### Phase 1 — Prove the Fli source works
+
+Every scheduled scan compares these one-way source probes:
+
+- `JFK → LHR` Jan 27, 2027 — busy control route (must return itineraries to establish basic search health).
+- `YYC → ATQ` Jan 27, 2027 — actual outbound direction.
+- `ATQ → YYC` Apr 15, 2027 — actual return direction.
+
+Read the `PROVIDER HEALTH` line. `provider_unhealthy_or_blocked` does **not** mean no flights exist. `one_way_routes_healthy` establishes only one-way parsing/availability for the sample dates; the two subsequent detailed round-trip searches are a separate check. The `LIVE DIAGNOSTIC` line reports raw paired results, rejected reasons, and accepted results. Calendar prices alone do not prove a booking is available. Both directions must be within 31 hours before a real deal alert is sent.
+
+### Phase 2 — Compare maintained upstream against stable Fli
+
+GitHub Actions → `Personal YYC–ATQ Flight Watch (health + diagnostics)` → **Run workflow**.
+
+Select `task: health`, `fli_channel: upstream`. The scheduled run defaults to a pinned upstream revision `881aee5ff4321e81ea2157cb44be94ce6a21dc1b` (maintained after the published 0.9.0). This uses the GitHub source because PyPI's stable `flights==0.9.0` cannot provide newer fixes. The pinned revision is an experiment: it is **not yet proven** against this route. To compare, repeat health with `fli_channel: stable`. The `requirements.txt` file stays stable so downgrading takes one selection, not a code change.
+
+Optional independent **cached historical discovery**, not a live offer source: set a `TRAVELPAYOUTS_TOKEN` GitHub Actions secret. The bot requests cached YYC/ATQ signals for the two detailed date pairs, saves them with verification `cached_unverified_no_durations`, and **never** sends a fare alert from this feed. Travelpayouts is a partner API and may return no data; joining it requires your own token/account. Real-time independent source and checkout verification remain future work if current free sources cannot deliver them.
+
+### Phase 3 — Dates and coverage
+
+The bot initializes all **216** departure/return pairs for Jan 25–31, 2027 and 60–90 nights in India, latest Apr 30. It cycles two duration-based calendar requests and two detailed round-trip date pairs per four-hour scheduled run. `COVERAGE` prints counts and fractions of total pairs covered by each method; it distinguishes attempted detailed searches from **nonempty results actually obtained**. Empty provider results are marked `provider_empty_unverified`, not genuine no-inventory. Date selection prioritizes never-tested pairs so one cheap pair cannot permanently starve the remainder.
+
+**Limit:** two detailed date pairs every four hours means a complete first detailed pass can take ~18 days (216/2/6 runs per day), assuming no errors. Calendar lengths can cover all 31 stays in ~2.6 days but may return no quotes for some pairs. A complete exhaustive live 216-pair fresh scan every four hours is **not** achieved. Do not increase request rates until health, runtime and provider limits have been verified.
+
+### Phase 4 — Validate and test alerts
+
+Create private GitHub Actions repository secrets in **Settings → Secrets and variables → Actions → New repository secret**:
+
+- `TELEGRAM_BOT_TOKEN` from your own Telegram bot.
+- `TELEGRAM_CHAT_ID` for your Telegram chat.
+- `TRAVELPAYOUTS_TOKEN` (optional; independent cached-data provider).
+
+Choose `task: test-telegram` once from Run workflow; you should receive a clearly labeled test message. Never paste Telegram tokens into commits or a public discussion. Real Telegram alerts require a live paired fare at or under CAD $1,900, both directions at or under 31 hours, and deduplication. The CAD $1,600 target gets an additional target label. Fares above $1,900 are recorded for history if otherwise valid; this is **not checkout-price verification**, and a search link may not reproduce the exact quote. No auto-booking.
+
+To inspect on Codespaces:
+
+```bash
+python -m unittest discover -s tests -v
+python tracker.py status
+# With the Fli dependency installed and network available:
+python tracker.py health
+```
+
+Because the SQLite database contains your personal travel dates, prefer **private repository** access when possible. On a public repository, its committed database and previous commits are public, including historic contents even if you later delete the file.

@@ -50,6 +50,14 @@ def init(path=DB):
     CREATE TABLE IF NOT EXISTS operations (id INTEGER PRIMARY KEY, at_utc TEXT NOT NULL,
       kind TEXT NOT NULL, detail TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS health_checks (id INTEGER PRIMARY KEY, at_utc TEXT NOT NULL,
+      status TEXT NOT NULL, details TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS live_diagnostics (id INTEGER PRIMARY KEY, at_utc TEXT NOT NULL,
+      depart TEXT NOT NULL, return_date TEXT NOT NULL, status TEXT NOT NULL,
+      raw_pairs INTEGER NOT NULL, eligible INTEGER NOT NULL, detail TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS secondary_quotes (id INTEGER PRIMARY KEY, at_utc TEXT NOT NULL,
+      depart TEXT NOT NULL, return_date TEXT NOT NULL, price_cad INTEGER,
+      source TEXT NOT NULL, verification TEXT NOT NULL, details TEXT NOT NULL);
     ''')
     con.executemany('INSERT OR IGNORE INTO pairs(depart,return_date) VALUES(?,?)',
                     [(d.isoformat(), r.isoformat()) for d,r in date_pairs()])
@@ -222,6 +230,94 @@ def search_round_trip(d, r, top_n=5, diagnostic=None):
     diagnostic['expanded_outbound_limit'] = top_n
     return classify_round_trip_results(list(raw or []), diagnostic)
 
+def probe_one_way(origin, destination, travel_date):
+    """Provider-health probe, not a booking price or a round-trip offer."""
+    m = _fli()
+    filt = m['FlightSearchFilters'](
+        trip_type=m['TripType'].ONE_WAY,
+        passenger_info=m['PassengerInfo'](adults=1),
+        flight_segments=[_seg(m, origin, destination, travel_date)],
+        seat_type=m['SeatType'].ECONOMY,
+        sort_by=m['SortBy'].CHEAPEST)
+    raw = m['SearchFlights']().search(filt, currency='CAD', language='en-CA', country='CA')
+    items = list(raw or [])
+    return {'route': f'{origin}-{destination}', 'date':travel_date,
+            'returned': len(items), 'sample_types':[type(x).__name__ for x in items[:2]]}
+
+
+def classify_provider_health(probes):
+    """Do not infer no inventory from silent provider empties."""
+    control = probes.get('control', {})
+    outbound = probes.get('outbound', {})
+    inbound = probes.get('return', {})
+    if any('error' in p for p in (control,outbound,inbound)):
+        return 'provider_error'
+    if not control.get('returned', 0):
+        return 'provider_unhealthy_or_blocked'
+    if outbound.get('returned',0) and inbound.get('returned',0):
+        return 'one_way_routes_healthy'
+    return 'control_healthy_target_inconclusive'
+
+
+def run_provider_health(con, pause=0):
+    # A frequent nonstop route gives us a control separate from YYC/ATQ availability.
+    specs = [('control','JFK','LHR','2027-01-27'),
+             ('outbound','YYC','ATQ','2027-01-27'),
+             ('return','ATQ','YYC','2027-04-15')]
+    probes = {}
+    for key,origin,dest,dt in specs:
+        try:
+            probes[key] = probe_one_way(origin,dest,dt)
+        except Exception as exc:
+            probes[key] = {'route': f'{origin}-{dest}', 'error':type(exc).__name__,
+                           'detail':str(exc)[:220]}
+        if pause:time.sleep(pause)
+    status = classify_provider_health(probes)
+    report={'status':status,'probes':probes}
+    con.execute('INSERT INTO health_checks(at_utc,status,details) VALUES(?,?,?)',
+                (utc(),status,json.dumps(report,sort_keys=True)))
+    con.commit()
+    print('PROVIDER HEALTH '+json.dumps(report,sort_keys=True),flush=True)
+    return report
+
+
+def persist_live_diagnostic(con, d, r, diagnostic):
+    con.execute("""INSERT INTO live_diagnostics(at_utc,depart,return_date,status,raw_pairs,eligible,detail)
+        VALUES(?,?,?,?,?,?,?)""",
+        (utc(),d,r,diagnostic.get('provider_status','unknown'),
+         diagnostic.get('raw_pairs',0),diagnostic.get('eligible',0),json.dumps(diagnostic,sort_keys=True)))
+    con.commit()
+
+
+def fetch_secondary_cached_quote(d, r):
+    """Optional independent Travelpayouts CACHE. Not live or duration-validated."""
+    token = os.getenv('TRAVELPAYOUTS_TOKEN','')
+    if not token:return None
+    query=urlencode({'origin':'YYC','destination':'ATQ','depart_date':d,
+                     'return_date':r,'currency':'CAD'})
+    req=Request('https://api.travelpayouts.com/v1/prices/cheap?'+query,
+                headers={'X-Access-Token':token,'Accept':'application/json'})
+    with urlopen(req,timeout=20) as resp:payload=json.load(resp)
+    if not payload.get('success'):
+        raise RuntimeError('Travelpayouts cached-data API returned an unsuccessful response')
+    data=payload.get('data') or {}
+    offers=data.get('ATQ',{}) if isinstance(data,dict) else {}
+    prices=[]
+    if isinstance(offers,dict):
+        for item in offers.values():
+            if isinstance(item,dict) and valid_price(item.get('price')) is not None:
+                prices.append(valid_price(item['price']))
+    return min(prices) if prices else None
+
+
+def record_secondary_quote(con,d,r,price):
+    con.execute("""INSERT INTO secondary_quotes(at_utc,depart,return_date,price_cad,
+       source,verification,details) VALUES(?,?,?,?,?,?,?)""",
+       (utc(),d,r,price,'travelpayouts','cached_unverified_no_durations',
+        json.dumps({'note':'Discovery signal only, NOT a live/verified itinerary'})))
+    con.commit()
+
+
 def record_discovery(con,stay,found):
     now=utc()
     checked=0
@@ -252,14 +348,15 @@ def choose_stays(con,per_run):
 
 
 def choose_live(con,limit):
-    """Prioritize low calendar quotes; bootstrap live searches without calendar data."""
-    query = """SELECT * FROM pairs WHERE
-        (last_live IS NULL OR julianday(last_live) < julianday('now','-24 hours'))
-        ORDER BY CASE WHEN discovery_price IS NOT NULL AND discovery_price<=? THEN 0
-                      WHEN discovery_price IS NOT NULL THEN 1 ELSE 2 END,
+    """Fair rotation: never starve unquoted pairs behind repeatedly cheap quotes."""
+    query = """SELECT * FROM pairs
+        WHERE last_live IS NULL OR julianday(last_live) < julianday('now','-24 hours')
+        ORDER BY CASE WHEN last_live IS NULL THEN 0 ELSE 1 END,
+        COALESCE(julianday(last_live),0) ASC,
+        CASE WHEN discovery_price IS NOT NULL AND discovery_price<=? THEN 0
+             WHEN discovery_price IS NOT NULL THEN 1 ELSE 2 END,
         CASE WHEN depart='2027-01-27' THEN 0 ELSE 1 END,
-        ABS(julianday(return_date)-julianday('2027-04-15')),
-        COALESCE(last_live,''), COALESCE(discovery_price,999999)
+        ABS(julianday(return_date)-julianday('2027-04-15')), depart, return_date
         LIMIT ?"""
     return con.execute(query,(ALERT,limit)).fetchall()
 
@@ -295,39 +392,82 @@ def maybe_alert(con,d,r,offer):
     return delivered
 
 
-def run(con, calendar_per_run=2, live_per_run=1, pause=10, dry_run=False):
+def run(con, calendar_per_run=2, live_per_run=2, pause=10, dry_run=False):
     if date.today()>date(2027,1,31):
         print('Departure period has passed: no more scans.');return
     stays=choose_stays(con,calendar_per_run)
-    print('Calendar stay-length batches:',stays)
+    print('Calendar stay-length batches:',stays,flush=True)
     if dry_run:return
+    errors=[]
+    # Phase 1: classify the upstream using three low-volume, one-way probes.
+    health=run_provider_health(con, min(pause,3))
+    if health['status'] in ('provider_error','provider_unhealthy_or_blocked'):
+        errors.append('One-way control/target health checks failed or were empty')
     for stay in stays:
         try:
             res=discover_stay(stay);checked=record_discovery(con,stay,res)
-            print(f'Duration {stay}: {checked} pairs accounted for, {len(res)} quotes found')
+            print(f'Duration {stay}: {checked} date pairs accounted for, {len(res)} cached/calendar quotes',flush=True)
             log(con,'calendar_ok',f'{stay}: {len(res)} quotes')
         except Exception as exc:
             log(con,'calendar_error',f'{stay}: {type(exc).__name__}: {str(exc)[:300]}')
-            print(f'CALENDAR PROVIDER ERROR duration {stay}: {type(exc).__name__}: {exc}',file=sys.stderr,flush=True)
+            errors.append(f'Calendar {stay}: {type(exc).__name__}')
+            print(f'CALENDAR PROVIDER ERROR {stay}: {type(exc).__name__}: {exc}',file=sys.stderr,flush=True)
         time.sleep(max(0,pause))
-    errors = []
+    empty_count=0
     for row in choose_live(con,live_per_run):
         d,r=row['depart'],row['return_date']
-        diagnostic = {}
+        diagnostic={}
         try:
             offers=search_round_trip(d,r,top_n=5,diagnostic=diagnostic)
-            record_live(con,d,r,offers)
-            for item in offers:maybe_alert(con,d,r,item)
+            if diagnostic['provider_status']=='empty_response':
+                # Empty response is UNVERIFIED, not proof of zero available flights.
+                empty_count+=1
+                con.execute("""UPDATE pairs SET last_live=?, live_price=NULL,
+                    live_status='provider_empty_unverified'
+                    WHERE depart=? AND return_date=?""",(utc(),d,r))
+                con.commit()
+            else:
+                record_live(con,d,r,offers)
+                for item in offers:maybe_alert(con,d,r,item)
             diagnostic.update(depart=d,return_date=r)
+            persist_live_diagnostic(con,d,r,diagnostic)
             log(con,'live_diagnostic',json.dumps(diagnostic,sort_keys=True))
             print('LIVE DIAGNOSTIC '+json.dumps(diagnostic,sort_keys=True),flush=True)
+            if os.getenv('TRAVELPAYOUTS_TOKEN'):
+                try:
+                    cached=fetch_secondary_cached_quote(d,r)
+                    record_secondary_quote(con,d,r,cached)
+                    print('SECONDARY CACHE '+json.dumps({'depart':d,'return_date':r,
+                        'price_cad':cached,'verification':'cached_unverified_no_durations'}),flush=True)
+                except Exception as exc:
+                    errors.append(f'Travelpayouts: {type(exc).__name__}')
+                    print('SECONDARY CACHE ERROR '+str(exc)[:200],file=sys.stderr,flush=True)
         except Exception as exc:
             log(con,'live_error',f'{d}/{r}: {type(exc).__name__}: {str(exc)[:300]}')
-            errors.append(f'Live {d}/{r}: {exc}')
+            errors.append(f'Live {d}/{r}: {type(exc).__name__}')
             print(f'LIVE PROVIDER ERROR {d}/{r}: {type(exc).__name__}: {exc}',file=sys.stderr,flush=True)
         time.sleep(max(0,pause))
+    if empty_count and health['status']=='one_way_routes_healthy':
+        errors.append(f'{empty_count} empty round trips while both directions had one-way results')
+    if empty_count==live_per_run and live_per_run and health['status']!='one_way_routes_healthy':
+        errors.append(f'{empty_count} round-trip searches empty; route availability not verified')
+    print_coverage(con)
     if errors:
-        raise RuntimeError('Provider searches failed; see live_error operations: '+ '; '.join(errors)[:500])
+        raise RuntimeError('SCAN DEGRADED: '+'; '.join(errors)[:650])
+
+
+def print_coverage(con):
+    total=con.execute('SELECT COUNT(*) FROM pairs').fetchone()[0]
+    calendar=con.execute('SELECT COUNT(*) FROM pairs WHERE last_discovered IS NOT NULL').fetchone()[0]
+    detailed=con.execute('SELECT COUNT(DISTINCT depart||return_date) FROM live_diagnostics').fetchone()[0]
+    verified=con.execute("""SELECT COUNT(DISTINCT depart||return_date) FROM live_diagnostics
+        WHERE status IN ('eligible_found','all_rejected')""").fetchone()[0]
+    accepted=con.execute("SELECT COUNT(*) FROM pairs WHERE live_price IS NOT NULL").fetchone()[0]
+    print('COVERAGE '+json.dumps({'total_date_pairs':total,'calendar_seen_pairs':calendar,
+      'detailed_attempted_pairs':detailed,'detailed_nonempty_pairs':verified,
+      'pairs_with_valid_live_fares':accepted,'calendar_pct':round(calendar*100/total,1),
+      'detailed_nonempty_pct':round(verified*100/total,1)}),flush=True)
+
 
 def status(con):
     total=con.execute('SELECT COUNT(*) FROM pairs').fetchone()[0]
@@ -339,6 +479,9 @@ def status(con):
         FROM pairs WHERE live_price IS NOT NULL OR discovery_price IS NOT NULL
         ORDER BY COALESCE(live_price,discovery_price) LIMIT 15''').fetchall()
     for x in rows:print(dict(x))
+    print_coverage(con)
+    health=con.execute('SELECT at_utc,status FROM health_checks ORDER BY id DESC LIMIT 1').fetchone()
+    if health:print('Last provider health:',dict(health))
 
 
 def confirm(con,d,r,price,seller):
@@ -355,10 +498,10 @@ def confirm(con,d,r,price,seller):
 
 def main():
     p=argparse.ArgumentParser(description='Free-first YYC–ATQ Level 2 fare monitor')
-    p.add_argument('command',nargs='?',choices=['scan','status','pairs','confirm'],default='scan')
+    p.add_argument('command',nargs='?',choices=['scan','status','pairs','confirm','health','test-telegram'],default='scan')
     p.add_argument('--dry-run',action='store_true')
     p.add_argument('--calendar-per-run',type=int,default=int(os.getenv('CALENDAR_PER_RUN','2')))
-    p.add_argument('--live-per-run',type=int,default=int(os.getenv('LIVE_PER_RUN','1')))
+    p.add_argument('--live-per-run',type=int,default=int(os.getenv('LIVE_PER_RUN','2')))
     p.add_argument('--pause',type=float,default=float(os.getenv('PAUSE_SECONDS','10')))
     p.add_argument('--depart');p.add_argument('--return-date');p.add_argument('--price',type=float);p.add_argument('--seller-url')
     args=p.parse_args()
@@ -367,6 +510,16 @@ def main():
         elif args.command=='pairs':
             for d,r in date_pairs():print(d,r)
         elif args.command=='confirm':confirm(con,args.depart,args.return_date,args.price,args.seller_url)
+        elif args.command=='health':
+            result=run_provider_health(con)
+            if result['status'] in ('provider_error','provider_unhealthy_or_blocked'):
+                raise SystemExit('Provider health check FAILED; empty control does not imply no flights')
+        elif args.command=='test-telegram':
+            if not os.getenv('TELEGRAM_BOT_TOKEN') or not os.getenv('TELEGRAM_CHAT_ID'):
+                raise SystemExit('Configure TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in GitHub Actions secrets first')
+            if not send_telegram('TEST ONLY: YYC-ATQ flight watch notifications configured. No fare has been found.'):
+                raise SystemExit('Telegram test message was not sent')
+            print('Telegram test delivered')
         else:run(con,max(0,min(args.calendar_per_run,31)),max(0,min(args.live_per_run,3)),args.pause,args.dry_run)
 
 if __name__=='__main__':main()
