@@ -290,3 +290,14 @@ limitations. Public documentation only; no signup, paid request, key sharing or
 subscription changes. Candidate comparison includes SerpApi, SearchApi, HasData,
 Scrapingdog, FlightAPI and Travelpayouts. Public-source fetching is parallel and
 bounded; it does not consume flight-search credits or alter the active monitor.
+
+E015 official-source research complete: pricing/contracts in source41591948276
+and41592494316; detailed math and limitations inCOST_OPTIONS.md. FlightPowers
+publisher SDK/website advertise1callcompleteRT andULTRA$25/10000+$0.002overage;
+31daybaseline10044calls estimates$25.09beforetax/retries, not a guarantee of live
+fit. Free10callhardcap is the next validation option, not an automatic signup.
+SearchApi$100/35000is a two-stage fallback versusSerpApi$275/30000. SearchApi
+calendar can screen70datecrossproduct(54valid) in1request,180–186/month, but does
+not replace full31hper-direction checks. No verifiedfreefull-frequencysource.
+HasData15credits/call makes full31dayuse301320credits; entryplan insufficient.
+No money/flightcredits spent or production provider changed.
