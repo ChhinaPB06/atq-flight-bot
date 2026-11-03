@@ -127,3 +127,10 @@ CAPTCHA/consent solving, or requests after an access denial. Keep this outside
 production. Only the browser candidate runs in this experiment; do not repeat
 unchanged stable/upstream HTTP queries. Stop if browser is blocked. No claim of
 an independent provider: this remains Google with a different normal client.
+
+E007 first runner attempt 41578762803 failed during dependency preparation,
+before any browser/provider query. Latest runner image is migrating to Ubuntu
+26; Playwright 1.58 targets supported older Ubuntu images. Pin experiment runner
+to Ubuntu 24.04 and add safe setup phase/exit-code evidence. This is a platform
+compatibility diagnosis to test, not a confirmed explanation without setup logs.
+No flight data was obtained and no browser access claim is made.
