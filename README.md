@@ -111,3 +111,54 @@ python tracker.py health
 ```
 
 Because the SQLite database contains your personal travel dates, prefer **private repository** access when possible. On a public repository, its committed database and previous commits are public, including historic contents even if you later delete the file.
+
+## Development and persistence update
+
+See [PROJECT_STATUS.md](PROJECT_STATUS.md) for current acceptance evidence and
+unresolved live-access blockers. Use Python 3.12 and an isolated virtualenv:
+
+```sh
+python3 -m venv /workspace/venvs/atq-flight-bot
+. /workspace/venvs/atq-flight-bot/bin/activate
+pip install -r requirements.txt
+export FLIGHT_DB=/workspace/atq-flight-bot-local/fares.sqlite3
+python -m unittest discover -s tests -v
+python tracker.py scan --dry-run
+python tracker.py status
+# Only when provider access is permitted:
+python tracker.py health
+```
+
+Development commands should set FLIGHT_DB to avoid modifying the historical seed
+tracked in `state/fares.sqlite3`. The scheduled job now restores history from the
+`flight-data` branch, seeds from the tracked database only on first use, and saves
+using SQLite's backup API. It never rebases a SQLite database onto main. Keep
+Actions contents-write permission and allow ordinary bot pushes to `flight-data`.
+Do not run another independent writer against that branch: a racing push fails
+visibly rather than overwriting history. A failed persistence step leaves a
+14-day database artifact for recovery. Restore the latest known-good artifact
+manually after investigating integrity/push failures; never silently reset history.
+Artifacts have finite retention; the data branch is the durable source.
+
+The four-hour schedule is unchanged. At two detailed pairs per run, the minimum
+first pass is 18 days; reported percentages are cumulative, not freshness claims.
+Calendar and detailed checks have separate coverage. Failed detailed attempts
+count as attempted, not nonempty or valid. A parser/currency/identity failure makes
+the scan fail even if other offers succeeded. Duration-only rejections can be a
+healthy provider outcome. Empty results always remain unverified availability.
+
+For Telegram, set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in GitHub Actions secrets,
+then manually dispatch `task: test-telegram`. This sends a real message. Local
+mock tests prove formatting/dedup/retry behavior, not delivery. Failed deliveries
+are not deduplicated away. Successful duplicate itineraries alert again only on
+a price drop of at least CAD 100. Search quotes never imply checkout confirmation.
+
+Troubleshooting: CONNECT 403 in this cloud environment requires applying the
+saved network-domain additions in environment settings. A Google HTTP block,
+429, CAPTCHA or rate limit is a provider limitation; stop rather than bypass it.
+A strict unknown-currency rejection requires inspecting the response/parser,
+not assuming the requested currency was honored. Use `health` independently of
+`scan`; inspect PROVIDER HEALTH, LIVE DIAGNOSTIC, COVERAGE, workflow summary,
+and retained database before interpreting an empty result. The independent
+Offline validation workflow tests both stable and pinned upstream without
+credentials or flight requests.

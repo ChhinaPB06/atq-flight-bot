@@ -30,6 +30,9 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      FLIGHT_DB: ${{ runner.temp }}/flight-state/fares.sqlite3
+      FLI_TIMEOUT: "30"
     steps:
       - uses: actions/checkout@v5
         with:
@@ -49,6 +52,8 @@ jobs:
           python -c 'import fli; print("Installed Fli from:", fli.__file__)'
       - name: Offline unit tests
         run: python -m unittest discover -s tests -v
+      - name: Restore durable history
+        run: python scripts/persist_state.py restore
       - name: Flight watch task
         env:
           TASK: ${{ inputs.task || 'scan' }}
@@ -65,16 +70,23 @@ jobs:
             test-telegram) python tracker.py test-telegram ;;
             *) echo 'Invalid task'; exit 2 ;;
           esac
-      - name: Save scan diagnostics and SQLite history
+      - name: Persist history independently of code branches
         if: always()
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          if [ -f state/fares.sqlite3 ]; then
-            git add state/fares.sqlite3
+          if [ -f "$FLIGHT_DB" ]; then
+            python scripts/persist_state.py save
           fi
-          if ! git diff --cached --quiet; then
-            git commit -m 'Persist fare history and provider health [skip ci]'
-            git pull --rebase origin main
-            git push
+      - name: Retain database for recovery
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flight-history-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.FLIGHT_DB }}
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Auditable scan summary
+        if: always()
+        run: |
+          if [ -f "$FLIGHT_DB" ]; then
+            python tracker.py status >> "$GITHUB_STEP_SUMMARY"
           fi

@@ -171,7 +171,7 @@ def discover_stay(stay):
     return result
 
 
-def classify_round_trip_results(raw, diagnostic):
+def classify_round_trip_results(raw, diagnostic, depart=None, return_date=None):
     """Keep provider failures, invalid shapes and hard filters separate.
 
     The provider search price is NOT a checkout-confirmed price.
@@ -187,7 +187,20 @@ def classify_round_trip_results(raw, diagnostic):
             a, b = flight_info(pair[0]), flight_info(pair[1])
             total = a['price']
             observed = {'price_cad': total, 'outbound_min': a['duration'], 'inbound_min': b['duration']}
-            if total is None:
+            invalid_identity = False
+            if depart is not None:
+                for info, origin, destination, expected in (
+                    (a, 'YYC', 'ATQ', depart), (b, 'ATQ', 'YYC', return_date)):
+                    legs = info['legs']
+                    if (not legs or legs[0]['from'] != origin or legs[-1]['to'] != destination
+                            or legs[0]['depart_at'][:10] != expected):
+                        invalid_identity = True
+            currencies = [getattr(f, 'currency', None) for f in pair]
+            if depart is not None and any(c != 'CAD' for c in currencies):
+                reason = 'currency_unverified_or_not_cad'
+            elif invalid_identity:
+                reason = 'route_or_date_mismatch'
+            elif total is None:
                 reason = 'missing_or_invalid_roundtrip_price'
             elif a['duration'] is None or b['duration'] is None:
                 reason = 'missing_duration'
@@ -202,7 +215,8 @@ def classify_round_trip_results(raw, diagnostic):
             else:
                 reason = None
                 offers.append({'price_cad': total, 'outbound_min': a['duration'],
-                    'inbound_min': b['duration'], 'outbound': a['legs'], 'return': b['legs']})
+                    'inbound_min': b['duration'], 'outbound': a['legs'], 'return': b['legs'],
+                    'currency': 'CAD', 'ticket_type': 'round_trip', 'source': 'fli_live'})
         if reason:
             diagnostic['rejected'][reason] = diagnostic['rejected'].get(reason, 0) + 1
             if len(diagnostic['examples']) < 8:
@@ -228,7 +242,18 @@ def search_round_trip(d, r, top_n=5, diagnostic=None):
         seat_type=m['SeatType'].ECONOMY,sort_by=m['SortBy'].CHEAPEST)
     raw = m['SearchFlights']().search(filt, top_n=top_n, currency='CAD', language='en-CA', country='CA')
     diagnostic['expanded_outbound_limit'] = top_n
-    return classify_round_trip_results(list(raw or []), diagnostic)
+    return classify_round_trip_results(list(raw or []), diagnostic, d, r)
+
+def classify_failure(exc):
+    name = type(exc).__name__.lower()
+    code = getattr(exc, 'status_code', None)
+    if code == 429: return 'provider_rate_limited'
+    if code in (401,403): return 'provider_blocked'
+    if 'parse' in name or isinstance(exc, (ValueError, TypeError, KeyError)):
+        return 'parser_error'
+    if 'timeout' in name: return 'provider_timeout'
+    return 'provider_error'
+
 
 def probe_one_way(origin, destination, travel_date):
     """Provider-health probe, not a booking price or a round-trip offer."""
@@ -384,7 +409,7 @@ def maybe_alert(con,d,r,offer):
          f"Depart: {d} | Return: {r} | Stay {(date.fromisoformat(r)-date.fromisoformat(d)).days} nights\n"
          f"Travel: outbound {offer['outbound_min']/60:.1f}h, return {offer['inbound_min']/60:.1f}h (max 31h each)\n"
          f"Book/search: {flight_link(d,r)}\n"
-         f"Observed (UTC): {utc()}\n"
+         f"Source: Fli / Google Flights, round-trip search quote, CAD\nObserved (UTC): {utc()}\n"
          "Verify exact itinerary, checked bags, transit visas and TOTAL FINAL CHECKOUT PRICE before paying.")
     delivered=send_telegram(msg)
     if delivered:
@@ -403,6 +428,9 @@ def run(con, calendar_per_run=2, live_per_run=2, pause=10, dry_run=False):
     health=run_provider_health(con, min(pause,3))
     if health['status'] in ('provider_error','provider_unhealthy_or_blocked'):
         errors.append('One-way control/target health checks failed or were empty')
+    if errors:
+        print_coverage(con)
+        raise RuntimeError('SCAN DEGRADED: '+ '; '.join(errors))
     for stay in stays:
         try:
             res=discover_stay(stay);checked=record_discovery(con,stay,res)
@@ -419,6 +447,11 @@ def run(con, calendar_per_run=2, live_per_run=2, pause=10, dry_run=False):
         diagnostic={}
         try:
             offers=search_round_trip(d,r,top_n=5,diagnostic=diagnostic)
+            if any(diagnostic['rejected'].get(k) for k in (
+                    'unexpected_provider_shape', 'currency_unverified_or_not_cad',
+                    'route_or_date_mismatch', 'missing_or_invalid_roundtrip_price',
+                    'missing_duration', 'invalid_duration')):
+                errors.append(f'Live {d}/{r}: invalid provider identity/currency/shape')
             if diagnostic['provider_status']=='empty_response':
                 # Empty response is UNVERIFIED, not proof of zero available flights.
                 empty_count+=1
@@ -443,7 +476,12 @@ def run(con, calendar_per_run=2, live_per_run=2, pause=10, dry_run=False):
                     errors.append(f'Travelpayouts: {type(exc).__name__}')
                     print('SECONDARY CACHE ERROR '+str(exc)[:200],file=sys.stderr,flush=True)
         except Exception as exc:
-            log(con,'live_error',f'{d}/{r}: {type(exc).__name__}: {str(exc)[:300]}')
+            failure = {'provider_status': classify_failure(exc), 'error_type': type(exc).__name__}
+            persist_live_diagnostic(con,d,r,failure)
+            con.execute('UPDATE pairs SET last_live=?,live_status=? WHERE depart=? AND return_date=?',
+                        (utc(),failure['provider_status'],d,r))
+            con.commit()
+            log(con,'live_error',f'{d}/{r}: {type(exc).__name__}')
             errors.append(f'Live {d}/{r}: {type(exc).__name__}')
             print(f'LIVE PROVIDER ERROR {d}/{r}: {type(exc).__name__}: {exc}',file=sys.stderr,flush=True)
         time.sleep(max(0,pause))
@@ -466,7 +504,10 @@ def print_coverage(con):
     print('COVERAGE '+json.dumps({'total_date_pairs':total,'calendar_seen_pairs':calendar,
       'detailed_attempted_pairs':detailed,'detailed_nonempty_pairs':verified,
       'pairs_with_valid_live_fares':accepted,'calendar_pct':round(calendar*100/total,1),
-      'detailed_nonempty_pct':round(verified*100/total,1)}),flush=True)
+      'detailed_nonempty_pct':round(verified*100/total,1),
+      'detailed_attempted_pct':round(detailed*100/total,1),
+      'minimum_first_detailed_cycle_days':round(total/(2*6),1),
+      'freshness': 'cumulative coverage, not fresh verification of every pair'}),flush=True)
 
 
 def status(con):

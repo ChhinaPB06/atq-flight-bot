@@ -1,0 +1,30 @@
+name: Offline validation
+on:
+  pull_request:
+  push:
+    branches: [main, 'fix/**']
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        channel: [stable, upstream]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install provider
+        env:
+          CHANNEL: ${{ matrix.channel }}
+        run: |
+          if [ "$CHANNEL" = stable ]; then
+            pip install -r requirements.txt
+          else
+            pip install 'git+https://github.com/punitarani/fli.git@881aee5ff4321e81ea2157cb44be94ce6a21dc1b'
+          fi
+          pip check
+          python -c 'import tracker; tracker._fli()'
+      - run: python -m unittest discover -s tests -v
