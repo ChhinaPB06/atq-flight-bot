@@ -271,3 +271,11 @@ known-no-results envelope handling as unverified data absence, keep quota/rate
 errors explicit, and continue initial grid after no-data. Unknown errors still
 stop; this is not a proven diagnosis of the earlier opaque envelope until retry.
 No results must never be interpreted as zero flights. Add regression tests.
+
+E014 retry source41590235586:20completedchecks,19usable-quote pairs,1no-data
+Jan28/Apr20; then rolling-hour budget deferred. Marked degraded rather than green
+for unknown availability, preserving progress and19quote pairs.34remain. Lowest
+CAD2074 Jan29/Apr21 (1810/1702min); preferredJan27CAD2233Apr23. Explicitly label
+empty pairmetadata provider_empty_unverified, including persisted legacy metadata
+whose latest diagnostic is empty. Scheduler stays active; no duplicate queries
+for documentation changes. All54are tracked, not claimed freshly researched.

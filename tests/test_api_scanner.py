@@ -24,3 +24,10 @@ class ApiScannerTests(unittest.TestCase):
                 client.return_value.search.return_value=([],{'return_rows':4})
                 with self.assertRaisesRegex(RuntimeError,'SCAN DEGRADED'):t.run_api(con)
             self.assertEqual(con.execute('SELECT status FROM live_diagnostics').fetchone()[0],'all_rejected')
+
+    def test_empty_provider_data_is_explicitly_unverified(self):
+        with tempfile.TemporaryDirectory() as tmp,t.init(Path(tmp)/'db') as con:
+            with patch('providers.serpapi.Client') as client:
+                client.return_value.search.return_value=([],{'return_rows':0})
+                with self.assertRaisesRegex(RuntimeError,'SCAN DEGRADED'):t.run_api(con)
+            self.assertEqual(con.execute("SELECT live_status FROM pairs WHERE last_live IS NOT NULL").fetchone()[0],'provider_empty_unverified')

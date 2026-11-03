@@ -213,3 +213,18 @@ remains disabled; no PR was fabricated. Telegram remains disabled/deferred.
 A main-workflow configuration push event permits one immediate operational scan
 as well as the unchanged '23 */4 * * *' cron; future ordinary source/docs pushes
 will not trigger flight queries. Main workflow completion is to be observed.
+
+## Operational retry checkpoint
+
+Main run41590235586 advanced to20/54completedAPIchecks,19with usable quote data
+and1unverified no-data result (Jan28/Apr20). Unknown-error collapse was corrected;
+no-data pair did not prevent later grid progress. Batch remained visibly degraded
+for that unverified result; rolling-hour cap then deferred further checks.34pairs
+remain for the active four-hour schedule. No full-grid completion claim.
+
+New bestCAD2074 Jan29/Apr21,82days, conservative1810/1702minutes; Alaska/Qatar via
+SEA/DOH. PreferredJan27bestCAD2233returnApr23,1780/1832minutes. All are observed
+search quotes, not checkout-confirmed. No <=1900fare found. Current44tests plus
+explicit empty-status regression bring final45passingtests. Active54pair CSV is
+exported at/workspace/flight-search-54-pairs.csv. No extra API request is made for
+this documentation/status correction; next searches follow four-hour cadence.

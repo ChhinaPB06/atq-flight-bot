@@ -126,7 +126,7 @@ records only the user's reported checkout observation, never an independent chec
   active first-pass coverage6/54 before the main sweep.
 - Best observed at that checkpoint: **CAD2245,Jan27–Apr20**,83days,
   **25h25m outbound /28h10m return**, search quote only. New scans may change it.
-- **42offline tests** and actionlint pass. Tests alone are not live fare proof.
+- **45offline tests** and actionlint pass. Tests alone are not live fare proof.
 
 Inspect Actions summaries, LIVE DIAGNOSTIC, COVERAGE, saved history and the
 flight-provider-evidence branch. Run `python tracker.py status` against a restored
@@ -136,3 +136,5 @@ Earlier log sections describe superseded scopes and blockers. No automated PR wa
 created because repository policy disallowed Actions PR creation; normal
 fast-forward main activation was used for the user's requested live schedule.
 No force push or account-permission change occurred.
+
+Latest operational checkpoint:20/54pairs checked,19with usable quotes and1no-data result;34remain. BestobservedCAD2074 Jan29–Apr21,82days,30h10outbound/28h22return. PreferredJan27 bestCAD2233 returningApr23. Run41590235586 correctly marked degraded for the no-data pair while preserving all progress; rollinghour quota then deferred further checks. The active four-hour schedule continues remaining work. These prices are not checkout-confirmed.

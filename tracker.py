@@ -69,6 +69,10 @@ def init(path=DB):
     con.execute('DELETE FROM pairs WHERE '+inactive)
     con.executemany('INSERT OR IGNORE INTO pairs(depart,return_date) VALUES(?,?)',
                     [(d.isoformat(), r.isoformat()) for d,r in date_pairs()])
+    con.execute("""UPDATE pairs SET live_status='provider_empty_unverified'
+        WHERE live_price IS NULL AND live_status='no_eligible_itinerary'
+        AND (SELECT status FROM live_diagnostics d WHERE d.depart=pairs.depart
+             AND d.return_date=pairs.return_date ORDER BY id DESC LIMIT 1)='empty_response'""")
     con.commit(); return con
 
 
@@ -493,6 +497,8 @@ def run_api(con, dry_run=False):
                       raw_pairs=report.get('return_rows',0),eligible=len(offers),provider='serpapi_google_flights')
         persist_live_diagnostic(con,d,r,report)
         record_live(con,d,r,offers)
+        if report['provider_status']=='empty_response':
+            con.execute("UPDATE pairs SET live_status='provider_empty_unverified' WHERE depart=? AND return_date=?",(d,r));con.commit()
         con.execute('INSERT OR REPLACE INTO api_pair_checks VALUES (?,?,?)',(d,r,utc()));con.commit()
         for offer in offers:maybe_alert(con,d,r,offer)
         print('LIVE DIAGNOSTIC '+json.dumps(report))

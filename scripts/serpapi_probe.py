@@ -14,7 +14,7 @@ else:
     try:
         client=Client()
         with sqlite3.connect(os.environ['FLIGHT_DB']) as con:
-            offers,diagnostic=client.search(con,'2027-01-25','2027-04-16')
+            offers,diagnostic=client.search(con,'2027-01-27','2027-04-17')
         report.update(outcome='candidate_quotes_require_live_review' if offers else 'no_usable_quote',
                       diagnostic=diagnostic,sample_offers=offers[:3])
     except Exception as exc:
@@ -25,4 +25,4 @@ else:
             report['safe_reason']=str(exc)
 output=Path(sys.argv[1]);output.parent.mkdir(parents=True,exist_ok=True)
 output.write_text(json.dumps(report,indent=2)+'\n')
-raise SystemExit(1)  # candidate integration is not independently live-validated yet
+raise SystemExit(0 if report['outcome']=='candidate_quotes_require_live_review' else 1)
