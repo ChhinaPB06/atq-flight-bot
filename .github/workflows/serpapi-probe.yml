@@ -1,5 +1,6 @@
-name: Check free API candidate readiness
+name: Validate newly configured Free API access
 on:
+  workflow_dispatch:
   push:
     branches: [fix/roundtrip-provider-persistence]
     paths: [.github/workflows/serpapi-probe.yml]
