@@ -1,0 +1,7 @@
+{
+  "provider": "serpapi_google_flights",
+  "checkout_verified": false,
+  "outcome": "blocked_or_failed",
+  "error_type": "ProviderAccessError",
+  "safe_reason": "Only an explicitly confirmed Free account is allowed"
+}
