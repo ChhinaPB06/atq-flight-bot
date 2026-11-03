@@ -1,4 +1,4 @@
-name: Personal YYC–ATQ Flight Watch (health + diagnostics)
+name: Personal YYC–ATQ 54-pair Flight Watch
 on:
   push:
     branches: [main]

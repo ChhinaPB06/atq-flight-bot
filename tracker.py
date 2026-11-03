@@ -90,7 +90,7 @@ def valid_itinerary(price, out_min, back_min):
 
 def flight_link(d,r):
     # Generic search link, not guaranteed to reproduce an offer.
-    return 'https://www.google.com/travel/flights?'+urlencode({'q':f'Flights from Calgary to Amritsar departing {d} returning {r}'})
+    return 'https://www.google.com/travel/flights?'+urlencode({'q':f'Flights from Calgary to Amritsar departing {d} returning {r}', 'curr':'CAD'})
 
 
 def send_telegram(message):
@@ -483,7 +483,9 @@ def run_api(con, dry_run=False):
             if errors:raise RuntimeError('SCAN DEGRADED: '+'; '.join(errors))
             return
         except Exception as exc:
-            persist_live_diagnostic(con,d,r,{'provider_status':classify_failure(exc),'error_type':type(exc).__name__})
+            failure={'provider_status':classify_failure(exc),'error_type':type(exc).__name__}
+            if type(exc).__module__=='providers.serpapi':failure['safe_reason']=str(exc)
+            persist_live_diagnostic(con,d,r,failure)
             con.execute('UPDATE pairs SET last_live=?,live_status=? WHERE depart=? AND return_date=?',(utc(),'api_failure',d,r))
             con.commit()
             raise RuntimeError('API scan failed; authenticated details withheld') from None
