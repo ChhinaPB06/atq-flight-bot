@@ -1,0 +1,31 @@
+{
+  "source": "serpapi_google_flights",
+  "checkout_verified": false,
+  "observations_before": 12,
+  "status": "scan_completed",
+  "observations_after": 13,
+  "date_pairs": 216,
+  "api_reserved_searches": 2,
+  "integrity": "ok",
+  "latest_diagnostic": {
+    "id": 5,
+    "at_utc": "2026-11-03T05:29:16+00:00",
+    "depart": "2027-01-27",
+    "return_date": "2027-04-11",
+    "status": "eligible_found",
+    "raw_pairs": 1,
+    "eligible": 1,
+    "detail": "{\"eligible\": 1, \"outbound_rows\": 7, \"provider\": \"serpapi_google_flights\", \"provider_status\": \"eligible_found\", \"raw_pairs\": 1, \"rejected_returns\": 0, \"return_rows\": 1, \"status\": \"eligible_found\"}"
+  },
+  "recent_api_prices": [
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-11",
+      "price_cad": 2560,
+      "outbound_min": 1525,
+      "inbound_min": 1565,
+      "source": "serpapi_google_flights",
+      "verification": "live_search_not_checkout"
+    }
+  ]
+}
