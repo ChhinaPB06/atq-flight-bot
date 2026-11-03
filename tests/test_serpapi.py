@@ -92,3 +92,26 @@ class SerpApiTests(unittest.TestCase):
     def test_provider_quota_json_is_not_swallowed_as_empty(self):
         from providers.serpapi import rows,ProviderRateLimit
         with self.assertRaises(ProviderRateLimit):rows({'error':'You have reached your plan hourly limit.'})
+
+    def test_unmade_return_request_does_not_consume_local_capacity(self):
+        calls=[]
+        responses=[{'plan_id':'free','plan_monthly_price':0,'total_searches_left':250},
+                   {'search_parameters':{'currency':'CAD'},'best_flights':[]}]
+        def request(path,params):calls.append(path);return responses.pop(0)
+        with sqlite3.connect(':memory:') as con:
+            offers,report=Client('test-only',request).search(con,'2027-01-27','2027-04-17')
+            self.assertEqual(offers,[])
+            self.assertEqual(report['requests_made'],1)
+            self.assertEqual(con.execute('SELECT SUM(searches) FROM serpapi_usage').fetchone()[0],1)
+        self.assertEqual(calls,['account.json','search.json'])
+
+    def test_ambiguous_return_failure_keeps_full_reservation(self):
+        out=flight('YYC','ATQ','2027-01-27');out['departure_token']='test-token'
+        replies=[{'plan_id':'free','plan_monthly_price':0,'total_searches_left':250},
+                 {'search_parameters':{'currency':'CAD'},'best_flights':[out]}]
+        def request(path,params):
+            if not replies:raise ProviderAccessError('Request failed')
+            return replies.pop(0)
+        with sqlite3.connect(':memory:') as con:
+            with self.assertRaises(ProviderAccessError):Client('test-only',request).search(con,'2027-01-27','2027-04-17')
+            self.assertEqual(con.execute('SELECT SUM(searches) FROM serpapi_usage').fetchone()[0],2)

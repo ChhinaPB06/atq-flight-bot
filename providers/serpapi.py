@@ -25,7 +25,9 @@ def reserve(con,now=None,daily_limit=8):
         day=con.execute('SELECT COALESCE(SUM(searches),0) FROM serpapi_usage WHERE substr(at_utc,1,10)=?',(stamp[:10],)).fetchone()[0]
         hour=con.execute("SELECT COALESCE(SUM(searches),0) FROM serpapi_usage WHERE julianday(at_utc)>julianday(?,'-1 hour')",(stamp,)).fetchone()[0]
         if month+2>240 or day+2>daily_limit or hour+2>40:raise BudgetExhausted('Free search budget deferred')
-        con.execute('INSERT INTO serpapi_usage VALUES (?,2)',(stamp,));con.commit()
+        reservation=con.execute('INSERT INTO serpapi_usage VALUES (?,2)',(stamp,)).lastrowid
+        con.commit()
+        return reservation
     except Exception:
         con.rollback();raise
 
@@ -95,7 +97,7 @@ class Client:
 
     def search(self,con,depart,return_date,daily_limit=8):
         self.check_access()
-        reserve(con,daily_limit=daily_limit)
+        reservation=reserve(con,daily_limit=daily_limit)
         params={'engine':'google_flights','departure_id':'YYC','arrival_id':'ATQ',
                 'outbound_date':depart,'return_date':return_date,'currency':'CAD',
                 'adults':1,'travel_class':1,'type':1,'hl':'en','gl':'ca'}
@@ -107,7 +109,12 @@ class Client:
             except ProviderDataError:continue
             if item.get('departure_token'):
                 selected=item;break
-        if selected is None:return [],{'status':'no_usable_outbound','outbound_rows':len(candidates)}
+        if selected is None:
+            # The second HTTP call is provably not made; this is unused local
+            # capacity, not a refund of an ambiguous or provider-billed failure.
+            con.execute('UPDATE serpapi_usage SET searches=1 WHERE rowid=? AND searches=2',(reservation,))
+            con.commit()
+            return [],{'status':'no_usable_outbound','outbound_rows':len(candidates),'requests_made':1}
         returns=rows(self.request('search.json',{**params,'departure_token':selected['departure_token']}))
         offers=[];rejected=0
         for item in returns:

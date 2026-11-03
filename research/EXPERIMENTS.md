@@ -310,3 +310,12 @@ Read public first-party contracts; no live flight call, subscription, new key or
 production switch. Distinguish whole-grid price screening from full market/detail
 searches, and never report cached or carried-forward values as fresh verification.
 Current working Free monitor and cadence are unchanged during this research.
+
+E016 outcome: official docs41593393737 confirm SearchApi calendar200combo cap
+(our70rectangle/54valid), supported SerpApi selected_flights_json, and exact-query
+freecache expiry1hour. Quantified scenarios inSEARCH_EFFICIENCY.md and runnable
+search_costs.py:31day2stage20088calls;1call10044;calendar+3details1302;dailyfull+
+selectivedetails4433. Explicitly distinguish changed freshness guarantees.
+Implemented local reservation release only for provably unmade second request;
+ambiguous failures keep2.47tests pass. No new key, provider, paid plan, budget
+increase or liveflight query for research. Existing Free monitoring remains.
