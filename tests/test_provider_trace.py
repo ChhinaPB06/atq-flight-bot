@@ -33,3 +33,18 @@ class ProviderTraceTests(unittest.TestCase):
                 t.search_round_trip('2027-01-25','2027-04-16',top_n=1,diagnostic=report)
         self.assertEqual(report['fetch_events'][0]['stage'],'initial_outbound')
         self.assertEqual(report['fetch_events'][0]['error_type'],'TimeoutError')
+
+    def test_real_fli_enums_validate_as_iata_codes(self):
+        from datetime import datetime
+        from fli.models import FlightResult, FlightLeg, Airport, Airline
+        def flight(origin,dest,day):
+            leg=FlightLeg(departure_airport=origin,arrival_airport=dest,
+                departure_datetime=datetime.fromisoformat(day+'T12:00'),
+                arrival_datetime=datetime.fromisoformat(day+'T23:00'),
+                airline=Airline.AC,flight_number='1',duration=660)
+            return FlightResult(legs=[leg],price=2200,currency='CAD',duration=660,stops=0)
+        report={}
+        offers=t.classify_round_trip_results([(flight(Airport.YYC,Airport.ATQ,'2027-01-25'),
+            flight(Airport.ATQ,Airport.YYC,'2027-04-16'))],report,'2027-01-25','2027-04-16')
+        self.assertEqual(t._airport_code(Airport.YYC),'YYC')
+        self.assertEqual(len(offers),1)

@@ -19,7 +19,7 @@ jobs:
     env:
       FLI_TIMEOUT: '15'
       # Recover completed experiment evidence without repeating provider traffic.
-      RECOVER_RUN_ID: '41578099055'
+      RECOVER_RUN_ID: ''
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -91,3 +91,14 @@ jobs:
           path: ${{ runner.temp }}/provider-evidence/*.json
           if-no-files-found: warn
           retention-days: 14
+      - name: Require live usable evidence
+        if: always()
+        run: |
+          python - <<'PYCODE'
+          import json, os
+          from pathlib import Path
+          files = list((Path(os.environ['RUNNER_TEMP'])/'provider-evidence').glob('*.json'))
+          reports = [json.loads(p.read_text()) for p in files]
+          if not any(r.get('outcome') == 'usable_live_quote' for r in reports):
+              raise SystemExit('No usable live quote; recovered evidence is not success')
+          PYCODE

@@ -101,7 +101,7 @@ def send_telegram(message):
 
 
 def _airport_code(obj):
-    return getattr(obj,'value',str(obj))
+    return getattr(obj,'name',getattr(obj,'value',str(obj)))
 
 
 def flight_info(f):
@@ -187,7 +187,9 @@ def classify_round_trip_results(raw, diagnostic, depart=None, return_date=None):
         else:
             a, b = flight_info(pair[0]), flight_info(pair[1])
             total = a['price']
-            observed = {'price_cad': total, 'outbound_min': a['duration'], 'inbound_min': b['duration']}
+            observed = {'price_cad': total, 'outbound_min': a['duration'], 'inbound_min': b['duration'],
+                'outbound_identity': [{'from': l['from'], 'to': l['to'], 'depart_at': l['depart_at']} for l in a['legs']],
+                'return_identity': [{'from': l['from'], 'to': l['to'], 'depart_at': l['depart_at']} for l in b['legs']]}
             invalid_identity = False
             if depart is not None:
                 for info, origin, destination, expected in (

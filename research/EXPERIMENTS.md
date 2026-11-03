@@ -96,3 +96,17 @@ next action. Never put secret values or raw authenticated request URLs here.
 - Also corrected an earlier job-level runner.temp expression rejected by GitHub
   (run 41578097686). Use GITHUB_ENV at step runtime instead. Official actionlint
   v1.7.7 release checksum verified; all three workflows pass its expression check.
+
+### E005 recovered observations and E006 enum correction
+
+Recovery run 41578366680 successfully published original source-run 41578099055
+JSON on flight-provider-evidence. Recovery green status means evidence transport
+only, not successful fares. Stable 0.9.0 returned 8 initial outbounds and 3 paired
+results, all rejected by identity validation. Upstream 0.10.0 returned zero initial
+outbounds. Source inspection then reproduced an adapter bug: Airport.YYC.value
+is "Calgary International Airport", while Airport.YYC.name is "YYC". The newly
+added validation compared the human name with the IATA code. Corrected enum
+normalization and added real-model regression coverage, plus sanitized identity
+fields to future rejection examples. 27 tests pass in each version. Re-run one
+pair/version after this meaningful change; add a live-evidence gate to recovery
+so recovery alone cannot appear to satisfy live success.
