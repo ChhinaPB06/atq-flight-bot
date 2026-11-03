@@ -36,3 +36,17 @@ unavailable. CI execution and source response quality remain to be observed.
 
 No additional paid API, agent SDK runtime, browser dependency or proxy service
 was installed in the application. See FRAMEWORK_REVIEW.md for agent frameworks.
+
+## Outcome of actual alternative-transport trial
+
+Standard Playwright 1.58 on Ubuntu 24.04 did run, using the ordinary page and
+its own generated responses. Source run 41578961275 decoded 7 initial outbounds
+but selected-return expansion raised SearchRejectedError. Thus browser rendering
+helped initial data availability but did **not** solve reliable round-trip
+retrieval. Browser remains experimental and excluded from automatic production
+fallbacks. Do not retry through a block or claim this is an independent source.
+
+The runner confirmed no Amadeus or Travelpayouts credentials are configured.
+Independent live-source evaluation now requires authorized account access and
+verification that intended live queries fit a free allowance. No service was
+purchased and no production billing was enabled.

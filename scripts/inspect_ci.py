@@ -2,6 +2,7 @@
 import io
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -23,8 +24,11 @@ def inspect_run(run):
             if not name.endswith('.txt'):continue
             text=archive.read(name).decode(errors='replace')
             for line in text.splitlines():
+                # Verbose unit tests print fixture health on the test-name line.
+                # Accept only standalone structured events after a log timestamp.
+                line=re.sub(r'^\d{4}-\d{2}-\d{2}T\S+\s+', '', line)
                 for marker,key in [('PROVIDER HEALTH ','health'),('LIVE DIAGNOSTIC ','live')]:
-                    if marker not in line:continue
+                    if not line.startswith(marker):continue
                     try: data=json.loads(line.split(marker,1)[1])
                     except ValueError:continue
                     if key=='health':
@@ -54,6 +58,8 @@ if __name__=='__main__':
     report={'credential_presence':{name:bool(os.getenv(name)) for name in (
         'AMADEUS_CLIENT_ID','AMADEUS_CLIENT_SECRET','TRAVELPAYOUTS_TOKEN')},
         'historical_runs':[inspect_run(run) for run in (41573652801,41574283529,41574548188)],
-        'pull_request':review()}
+        'pull_request': review() if os.getenv('PREPARE_REVIEW')=='1' else {
+            'outcome':'repository_disallows_actions_pr_creation',
+            'evidence_run':41579361074, 'retry_attempted':False}}
     output=Path(sys.argv[1]);output.parent.mkdir(parents=True,exist_ok=True)
     output.write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')

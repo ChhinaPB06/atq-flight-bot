@@ -109,3 +109,22 @@ including guards that stop browser experiments on HTTP denial or consent pages.
 Draft PR automation run 41578624276 failed; no PR exists. The reason is not
 established by its generic HTML annotation, and account settings were not changed.
 The scheduled main deployment is unchanged. Do not claim project completion.
+
+## Latest checkpoint: actual browser trial and external blockers
+
+- Browser source run 41578961275: 7 decoded outbound options, then explicit
+  SearchRejectedError at selected-return expansion. No usable complete fare.
+- Real-model enum normalization fix remains tested; source/provider reliability
+  is unresolved. The best-fit architecture is retained provisionally; browser
+  experiment did not meet the live gate and is not a production fallback.
+- CI inspection 41579361074 recovered the historical run logs and confirmed
+  accepted/empty paired counts from runs #5/#8 and healthy real one-way counts
+  from #7/#8. Evidence extraction is being hardened to exclude mock test output.
+- Neither Amadeus credential nor Travelpayouts token is present in GitHub Actions.
+  Need an authorized independent live-data provider within verified free quota.
+- PR automation denial confirmed as repository Actions PR-creation policy.
+  No PR created, no account policy changed. A human may open the prepared PR.
+- Automatic diagnostic push trigger removed after provider rejection. Telegram
+  remains deferred; main scheduled workflow and repository visibility unchanged.
+- Remaining gates: new usable validated live quote, repeated real production
+  history persistence, successful scan CI, PR, later Telegram delivery.

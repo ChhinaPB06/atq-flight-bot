@@ -134,3 +134,32 @@ before any browser/provider query. Latest runner image is migrating to Ubuntu
 to Ubuntu 24.04 and add safe setup phase/exit-code evidence. This is a platform
 compatibility diagnosis to test, not a confirmed explanation without setup logs.
 No flight data was obtained and no browser access claim is made.
+
+### E007 observed result and external capability evidence
+
+Source run 41578961275 (Ubuntu 24.04) executed the ordinary rendered-browser
+experiment. It decoded 7 initial outbounds; selected-return expansion raised
+SearchRejectedError. No complete usable fare was returned. Stop browser requests
+on that rejection. Classify explicit rejections separately from generic failures;
+added tests for rejection, rate limit and browser denial. No stealth/replay or
+challenge-solving fallback is authorized or implemented.
+
+E008 CI inspection run 41579361074 successfully fetched historical logs. Run
+41573652801 had 8 accepted Jan25/Apr16 pairs and an empty Jan27/Apr16 search;
+41574283529/41574548188 recorded healthy real one-way probes (20/11/15), and
+41574548188 had empty Jan27/Apr12 and Jan27/Apr18 paired searches. Initial log
+extraction also included unit-test fixture health; fix extraction to accept only
+standalone timestamped structured events and test this distinction before using
+probe counts as live evidence. This correction does not alter the real 20/11/15
+observations or paired search counts.
+
+Runner credential presence checks found no AMADEUS_CLIENT_ID,
+AMADEUS_CLIENT_SECRET or TRAVELPAYOUTS_TOKEN (values never read into evidence).
+PR creation failure is now diagnosed: repository_disallows_actions_pr_creation.
+Do not change that sensitive account setting or retry unchanged PR creation.
+
+Next provider experiment requires an authorized independent source with verified
+free live-data allowance and securely configured credentials. Amadeus is a
+candidate, not a verified free production entitlement. Sandbox is insufficient.
+Asked user for existing provider account name only; never request tokens in chat.
+Automatic experiment push trigger removed; no accidental new provider requests.

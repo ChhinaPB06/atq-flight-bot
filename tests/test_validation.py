@@ -52,3 +52,14 @@ class ValidationTests(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError,'SCAN DEGRADED'):t.run(con,calendar_per_run=0,live_per_run=1,pause=0)
             self.assertNotEqual(dict(t.choose_live(con,1)[0]),first)
             self.assertEqual(con.execute('SELECT status FROM live_diagnostics').fetchone()[0],'parser_error')
+
+    def test_provider_rejection_and_rate_limit_are_distinct(self):
+        rejected=type('SearchRejectedError',(Exception,),{})
+        error=rejected();error.code=13
+        self.assertEqual(t.classify_failure(error),'provider_rejected')
+        error.code=8
+        self.assertEqual(t.classify_failure(error),'provider_rate_limited')
+        blocked=type('BrowserBlockedError',(Exception,),{})()
+        self.assertEqual(t.classify_failure(blocked),'provider_blocked')
+        http=Exception();http.status_code=429
+        self.assertEqual(t.classify_failure(http),'provider_rate_limited')
