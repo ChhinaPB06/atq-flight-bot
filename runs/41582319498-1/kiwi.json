@@ -1,0 +1,9 @@
+{
+  "checkout_verified": false,
+  "depart": "2027-01-25",
+  "outcome": "provider_blocked",
+  "page_status": 403,
+  "provider": "kiwi_public_page",
+  "requested_currency": "CAD",
+  "return_date": "2027-04-16"
+}
