@@ -1,0 +1,70 @@
+{
+  "credential_presence": {
+    "AMADEUS_CLIENT_ID": false,
+    "AMADEUS_CLIENT_SECRET": false,
+    "TRAVELPAYOUTS_TOKEN": false
+  },
+  "historical_runs": [
+    {
+      "health": [],
+      "live": [],
+      "log_fetch_exit": 0,
+      "run_id": 41654833453,
+      "test_failures": [
+        {
+          "log_file": "0_offline (stable).txt",
+          "summary": "FAIL: test_persisted_quote_rechecked_and_corruption_detected (test_coverage_report.CoverageReportTests.test_persisted_quote_rechecked_and_corruption_detected)"
+        },
+        {
+          "log_file": "0_offline (stable).txt",
+          "summary": "AssertionError: Lists differ: [{'observation_id': 1, 'error_type': 'Valu[38 chars]te'}] != []"
+        },
+        {
+          "log_file": "0_offline (stable).txt",
+          "summary": "Ran 56 tests in 0.455s"
+        },
+        {
+          "log_file": "0_offline (stable).txt",
+          "summary": "FAILED (failures=1)"
+        },
+        {
+          "log_file": "1_offline (upstream).txt",
+          "summary": "FAIL: test_persisted_quote_rechecked_and_corruption_detected (test_coverage_report.CoverageReportTests.test_persisted_quote_rechecked_and_corruption_detected)"
+        },
+        {
+          "log_file": "1_offline (upstream).txt",
+          "summary": "AssertionError: Lists differ: [{'observation_id': 1, 'error_type': 'Valu[38 chars]te'}] != []"
+        },
+        {
+          "log_file": "1_offline (upstream).txt",
+          "summary": "Ran 56 tests in 1.143s"
+        },
+        {
+          "log_file": "1_offline (upstream).txt",
+          "summary": "FAILED (failures=1)"
+        }
+      ]
+    },
+    {
+      "health": [],
+      "live": [],
+      "log_fetch_exit": 0,
+      "run_id": 41654025980,
+      "test_failures": [
+        {
+          "log_file": "0_verify.txt",
+          "summary": "Ran 54 tests in 0.983s"
+        }
+      ]
+    }
+  ],
+  "pull_request": {
+    "evidence_run": 41579361074,
+    "outcome": "repository_disallows_actions_pr_creation",
+    "retry_attempted": false
+  },
+  "runner_timezone_offsets": {
+    "2027-01-27T12:00": "-1 day, 18:00:00",
+    "2027-04-20T12:00": "-1 day, 18:00:00"
+  }
+}
