@@ -290,6 +290,7 @@ def search_round_trip(d, r, top_n=5, diagnostic=None):
 def classify_failure(exc):
     name = type(exc).__name__.lower()
     code = getattr(exc, 'status_code', None)
+    if name=='providerdataerror':return 'parser_error'
     if 'ratelimit' in name:return 'provider_rate_limited'
     if code == 429 or (getattr(exc,'code',None)==8 and 'rejected' in name): return 'provider_rate_limited'
     if code in (401,403) or 'blocked' in name: return 'provider_blocked'
@@ -464,17 +465,23 @@ def maybe_alert(con,d,r,offer):
 
 
 def run_api(con, dry_run=False):
-    from providers.serpapi import Client, BudgetExhausted
+    from providers.serpapi import Client, BudgetExhausted, diagnostic_status
     batch=max(1,min(int(os.getenv('API_INITIAL_BATCH','1')),18))
     selected=con.execute('''SELECT p.* FROM pairs p WHERE NOT EXISTS
         (SELECT 1 FROM api_pair_checks a WHERE a.depart=p.depart AND a.return_date=p.return_date)
-        ORDER BY CASE WHEN p.depart='2027-01-27' THEN 0 ELSE 1 END,
+        ORDER BY COALESCE(julianday(p.last_live),0),
+        CASE WHEN p.depart='2027-01-27' THEN 0 ELSE 1 END,
         ABS(julianday(p.return_date)-julianday('2027-04-15')),p.depart,p.return_date LIMIT ?''',(batch,)).fetchall()
     initial=bool(selected)
     if not initial:selected=choose_live(con,1)
     errors=[]
     if dry_run:
         print('API next pair:',dict(selected[0]) if selected else None)
+        return
+    if not selected:
+        log(con,'scan_idle','No date pair is due for another detailed check; no provider request made')
+        print('SCAN IDLE: no date pair due; no live verification performed')
+        print_coverage(con)
         return
     for row in selected:
         d,r=row['depart'],row['return_date']
@@ -490,15 +497,17 @@ def run_api(con, dry_run=False):
             failure={'provider_status':classify_failure(exc),'error_type':type(exc).__name__}
             if type(exc).__module__=='providers.serpapi':failure['safe_reason']=str(exc)
             persist_live_diagnostic(con,d,r,failure)
-            con.execute('UPDATE pairs SET last_live=?,live_status=? WHERE depart=? AND return_date=?',(utc(),'api_failure',d,r))
+            con.execute('UPDATE pairs SET last_live=?,live_price=NULL,live_status=? WHERE depart=? AND return_date=?',(utc(),'api_failure',d,r))
             con.commit()
             raise RuntimeError('API scan failed; authenticated details withheld') from None
-        report.update(provider_status=('eligible_found' if offers else 'all_rejected' if report.get('return_rows') else 'empty_response'),
-                      raw_pairs=report.get('return_rows',0),eligible=len(offers),provider='serpapi_google_flights')
+        report.update(provider_status=diagnostic_status(offers,report),
+                      raw_pairs=report.get('return_rows',0),eligible=len(offers),provider='serpapi_google_flights',
+                      depart=d,return_date=r)
         persist_live_diagnostic(con,d,r,report)
         record_live(con,d,r,offers)
-        if report['provider_status']=='empty_response':
-            con.execute("UPDATE pairs SET live_status='provider_empty_unverified' WHERE depart=? AND return_date=?",(d,r));con.commit()
+        if report['provider_status'] in ('empty_response','parser_error'):
+            state='provider_empty_unverified' if report['provider_status']=='empty_response' else 'parser_error'
+            con.execute('UPDATE pairs SET live_status=? WHERE depart=? AND return_date=?',(state,d,r));con.commit()
         con.execute('INSERT OR REPLACE INTO api_pair_checks VALUES (?,?,?)',(d,r,utc()));con.commit()
         for offer in offers:maybe_alert(con,d,r,offer)
         print('LIVE DIAGNOSTIC '+json.dumps(report))
@@ -572,7 +581,7 @@ def run(con, calendar_per_run=2, live_per_run=2, pause=10, dry_run=False):
         except Exception as exc:
             failure = {**diagnostic, 'provider_status': classify_failure(exc), 'error_type': type(exc).__name__}
             persist_live_diagnostic(con,d,r,failure)
-            con.execute('UPDATE pairs SET last_live=?,live_status=? WHERE depart=? AND return_date=?',
+            con.execute('UPDATE pairs SET last_live=?,live_price=NULL,live_status=? WHERE depart=? AND return_date=?',
                         (utc(),failure['provider_status'],d,r))
             con.commit()
             log(con,'live_error',f'{d}/{r}: {type(exc).__name__}')
@@ -594,7 +603,7 @@ def print_coverage(con):
     detailed=con.execute('SELECT COUNT(DISTINCT depart||return_date) FROM live_diagnostics WHERE (depart,return_date) IN (SELECT depart,return_date FROM pairs)').fetchone()[0]
     verified=con.execute("""SELECT COUNT(DISTINCT depart||return_date) FROM live_diagnostics
         WHERE (depart,return_date) IN (SELECT depart,return_date FROM pairs) AND status IN ('eligible_found','all_rejected')""").fetchone()[0]
-    accepted=con.execute("SELECT COUNT(*) FROM pairs WHERE live_price IS NOT NULL").fetchone()[0]
+    accepted=con.execute("SELECT COUNT(*) FROM pairs WHERE live_price IS NOT NULL AND live_status='verified_itinerary'").fetchone()[0]
     api_checked=con.execute('SELECT COUNT(*) FROM pairs p JOIN api_pair_checks a USING(depart,return_date)').fetchone()[0]
     print('COVERAGE '+json.dumps({'total_date_pairs':total,'calendar_seen_pairs':calendar,
       'detailed_attempted_pairs':detailed,'detailed_nonempty_pairs':verified,
