@@ -330,3 +330,13 @@ models and constraint pruning. Read first-party help/limits/billing docs; no
 accounts, inbox access, flight calls, subscriptions or provider-block retries.
 Do not use free accounts/trials/cloud/IPs to evade limits. Native alerts cannot
 be called a guaranteed4hfull-grid verification. Preserve running Free monitor.
+
+E017 result: COMPLETELY_FREE.md records first-principles zero-subscription design,
+primary help/cloud evidence41595990032 and3newrepo inspections. Best-supported
+free architecture is native price notifications+local parsing+selective existing
+Free confirmation. Exact4hfresh54pair guarantee is not established; significant-
+change email cadence is provider-controlled. No model/cloud/dataset can replace
+unobserved fare state; bulk/event feeds could reduce request counts in principle.
+Generated54native datewatch links via native_alert_setup.py; no alerts/accounts/
+inbox access created. Repo parsers have currency/template/contract gaps. No
+paid model/service/cloud, new keys, flight queries or provider-block retries.
