@@ -157,7 +157,7 @@ def discover_stay(stay):
             except ValueError:continue
         if not isinstance(d,date) or not isinstance(r,date):continue
         pair=(d.isoformat(),r.isoformat())
-        if pair not in ALL_PAIRS:continue
+        if pair not in {(a.isoformat(), b.isoformat()) for a, b in date_pairs()}:continue
         p=valid_price(getattr(item,'price',None))
         if p is not None and (pair not in result or p<result[pair]):result[pair]=p
     return result
