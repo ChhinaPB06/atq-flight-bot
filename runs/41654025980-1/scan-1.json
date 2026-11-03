@@ -1,0 +1,559 @@
+{
+  "source": "serpapi_google_flights",
+  "checkout_verified": false,
+  "observations_before": 116,
+  "status": "scan_failed",
+  "error_type": "RuntimeError",
+  "observations_after": 147,
+  "date_pairs": 54,
+  "api_reserved_searches": 112,
+  "integrity": "ok",
+  "coverage_kind": "cumulative attempts and observed quotes; not all pairs refreshed this run",
+  "pair_results": [
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-17",
+      "api_last_checked_at": "2026-11-03T06:18:42+00:00",
+      "last_live": "2026-11-03T06:18:42+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2290,
+      "api_observation_count": 3
+    },
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-18",
+      "api_last_checked_at": "2026-11-03T06:19:08+00:00",
+      "last_live": "2026-11-03T06:19:08+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2290,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-19",
+      "api_last_checked_at": "2026-11-03T05:29:43+00:00",
+      "last_live": "2026-11-03T05:29:43+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2269,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-20",
+      "api_last_checked_at": "2026-11-03T06:13:21+00:00",
+      "last_live": "2026-11-03T06:13:21+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2245,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-21",
+      "api_last_checked_at": "2026-11-03T06:13:47+00:00",
+      "last_live": "2026-11-03T06:13:47+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2281,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-22",
+      "api_last_checked_at": "2026-11-03T06:19:33+00:00",
+      "last_live": "2026-11-03T06:19:33+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2439,
+      "api_observation_count": 3
+    },
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-23",
+      "api_last_checked_at": "2026-11-03T06:22:41+00:00",
+      "last_live": "2026-11-03T06:22:41+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2233,
+      "api_observation_count": 3
+    },
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-24",
+      "api_last_checked_at": "2026-11-03T06:23:09+00:00",
+      "last_live": "2026-11-03T06:23:09+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2290,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-25",
+      "api_last_checked_at": "2026-11-03T06:23:31+00:00",
+      "last_live": "2026-11-03T06:23:31+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 3368,
+      "api_observation_count": 2
+    },
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-26",
+      "api_last_checked_at": "2026-11-03T06:23:49+00:00",
+      "last_live": "2026-11-03T06:23:49+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2269,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-27",
+      "api_last_checked_at": "2026-11-03T06:24:08+00:00",
+      "last_live": "2026-11-03T06:24:08+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2927,
+      "api_observation_count": 1
+    },
+    {
+      "depart": "2027-01-28",
+      "return_date": "2027-04-18",
+      "api_last_checked_at": "2026-11-03T06:24:28+00:00",
+      "last_live": "2026-11-03T06:24:28+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2927,
+      "api_observation_count": 1
+    },
+    {
+      "depart": "2027-01-28",
+      "return_date": "2027-04-19",
+      "api_last_checked_at": "2026-11-03T06:25:00+00:00",
+      "last_live": "2026-11-03T06:25:00+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2401,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-28",
+      "return_date": "2027-04-20",
+      "api_last_checked_at": "2026-11-03T06:30:02+00:00",
+      "last_live": "2026-11-03T06:30:02+00:00",
+      "live_status": "provider_empty_unverified",
+      "live_price": null,
+      "api_observation_count": 0
+    },
+    {
+      "depart": "2027-01-28",
+      "return_date": "2027-04-21",
+      "api_last_checked_at": "2026-11-03T06:31:08+00:00",
+      "last_live": "2026-11-03T06:31:08+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2413,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-28",
+      "return_date": "2027-04-22",
+      "api_last_checked_at": "2026-11-03T12:05:22+00:00",
+      "last_live": "2026-11-03T12:05:22+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2571,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-28",
+      "return_date": "2027-04-23",
+      "api_last_checked_at": "2026-11-03T12:07:02+00:00",
+      "last_live": "2026-11-03T12:07:02+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2636,
+      "api_observation_count": 1
+    },
+    {
+      "depart": "2027-01-28",
+      "return_date": "2027-04-24",
+      "api_last_checked_at": "2026-11-03T12:08:41+00:00",
+      "last_live": "2026-11-03T12:08:41+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2458,
+      "api_observation_count": 3
+    },
+    {
+      "depart": "2027-01-28",
+      "return_date": "2027-04-25",
+      "api_last_checked_at": "2026-11-03T12:10:18+00:00",
+      "last_live": "2026-11-03T12:10:18+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2423,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-28",
+      "return_date": "2027-04-26",
+      "api_last_checked_at": "2026-11-03T12:11:35+00:00",
+      "last_live": "2026-11-03T12:11:35+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2536,
+      "api_observation_count": 3
+    },
+    {
+      "depart": "2027-01-28",
+      "return_date": "2027-04-27",
+      "api_last_checked_at": "2026-11-03T14:29:58+00:00",
+      "last_live": "2026-11-03T14:29:58+00:00",
+      "live_status": "no_eligible_itinerary",
+      "live_price": null,
+      "api_observation_count": 0
+    },
+    {
+      "depart": "2027-01-28",
+      "return_date": "2027-04-28",
+      "api_last_checked_at": "2026-11-03T14:31:34+00:00",
+      "last_live": "2026-11-03T14:31:34+00:00",
+      "live_status": "provider_empty_unverified",
+      "live_price": null,
+      "api_observation_count": 0
+    },
+    {
+      "depart": "2027-01-29",
+      "return_date": "2027-04-19",
+      "api_last_checked_at": "2026-11-03T06:25:23+00:00",
+      "last_live": "2026-11-03T06:25:23+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2769,
+      "api_observation_count": 1
+    },
+    {
+      "depart": "2027-01-29",
+      "return_date": "2027-04-20",
+      "api_last_checked_at": "2026-11-03T06:30:28+00:00",
+      "last_live": "2026-11-03T06:30:28+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2992,
+      "api_observation_count": 1
+    },
+    {
+      "depart": "2027-01-29",
+      "return_date": "2027-04-21",
+      "api_last_checked_at": "2026-11-03T06:31:27+00:00",
+      "last_live": "2026-11-03T06:31:27+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2074,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-29",
+      "return_date": "2027-04-22",
+      "api_last_checked_at": "2026-11-03T12:05:47+00:00",
+      "last_live": "2026-11-03T12:05:47+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2992,
+      "api_observation_count": 1
+    },
+    {
+      "depart": "2027-01-29",
+      "return_date": "2027-04-23",
+      "api_last_checked_at": "2026-11-03T12:07:25+00:00",
+      "last_live": "2026-11-03T12:07:25+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2882,
+      "api_observation_count": 3
+    },
+    {
+      "depart": "2027-01-29",
+      "return_date": "2027-04-24",
+      "api_last_checked_at": "2026-11-03T12:09:09+00:00",
+      "last_live": "2026-11-03T12:09:09+00:00",
+      "live_status": "provider_empty_unverified",
+      "live_price": null,
+      "api_observation_count": 0
+    },
+    {
+      "depart": "2027-01-29",
+      "return_date": "2027-04-25",
+      "api_last_checked_at": "2026-11-03T12:10:38+00:00",
+      "last_live": "2026-11-03T12:10:38+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2202,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-29",
+      "return_date": "2027-04-26",
+      "api_last_checked_at": "2026-11-03T14:28:54+00:00",
+      "last_live": "2026-11-03T14:28:54+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2315,
+      "api_observation_count": 3
+    },
+    {
+      "depart": "2027-01-29",
+      "return_date": "2027-04-27",
+      "api_last_checked_at": "2026-11-03T14:30:22+00:00",
+      "last_live": "2026-11-03T14:30:22+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2804,
+      "api_observation_count": 3
+    },
+    {
+      "depart": "2027-01-29",
+      "return_date": "2027-04-28",
+      "api_last_checked_at": "2026-11-03T14:32:04+00:00",
+      "last_live": "2026-11-03T14:32:04+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2809,
+      "api_observation_count": 5
+    },
+    {
+      "depart": "2027-01-29",
+      "return_date": "2027-04-29",
+      "api_last_checked_at": "2026-11-03T14:33:13+00:00",
+      "last_live": "2026-11-03T14:33:13+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2145,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-30",
+      "return_date": "2027-04-20",
+      "api_last_checked_at": "2026-11-03T06:30:49+00:00",
+      "last_live": "2026-11-03T06:30:49+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 3146,
+      "api_observation_count": 1
+    },
+    {
+      "depart": "2027-01-30",
+      "return_date": "2027-04-21",
+      "api_last_checked_at": "2026-11-03T06:31:47+00:00",
+      "last_live": "2026-11-03T06:31:47+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2228,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-30",
+      "return_date": "2027-04-22",
+      "api_last_checked_at": "2026-11-03T12:06:16+00:00",
+      "last_live": "2026-11-03T12:06:16+00:00",
+      "live_status": "no_eligible_itinerary",
+      "live_price": null,
+      "api_observation_count": 0
+    },
+    {
+      "depart": "2027-01-30",
+      "return_date": "2027-04-23",
+      "api_last_checked_at": "2026-11-03T12:07:45+00:00",
+      "last_live": "2026-11-03T12:07:45+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2735,
+      "api_observation_count": 1
+    },
+    {
+      "depart": "2027-01-30",
+      "return_date": "2027-04-24",
+      "api_last_checked_at": "2026-11-03T12:09:37+00:00",
+      "last_live": "2026-11-03T12:09:37+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2229,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-30",
+      "return_date": "2027-04-25",
+      "api_last_checked_at": "2026-11-03T12:10:57+00:00",
+      "last_live": "2026-11-03T12:10:57+00:00",
+      "live_status": "provider_empty_unverified",
+      "live_price": null,
+      "api_observation_count": 0
+    },
+    {
+      "depart": "2027-01-30",
+      "return_date": "2027-04-26",
+      "api_last_checked_at": "2026-11-03T14:29:17+00:00",
+      "last_live": "2026-11-03T14:29:17+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2834,
+      "api_observation_count": 1
+    },
+    {
+      "depart": "2027-01-30",
+      "return_date": "2027-04-27",
+      "api_last_checked_at": "2026-11-03T14:30:42+00:00",
+      "last_live": "2026-11-03T14:30:42+00:00",
+      "live_status": "no_eligible_itinerary",
+      "live_price": null,
+      "api_observation_count": 0
+    },
+    {
+      "depart": "2027-01-30",
+      "return_date": "2027-04-28",
+      "api_last_checked_at": "2026-11-03T14:32:28+00:00",
+      "last_live": "2026-11-03T14:32:28+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2292,
+      "api_observation_count": 2
+    },
+    {
+      "depart": "2027-01-30",
+      "return_date": "2027-04-29",
+      "api_last_checked_at": "2026-11-03T14:33:31+00:00",
+      "last_live": "2026-11-03T14:33:31+00:00",
+      "live_status": "no_eligible_itinerary",
+      "live_price": null,
+      "api_observation_count": 0
+    },
+    {
+      "depart": "2027-01-30",
+      "return_date": "2027-04-30",
+      "api_last_checked_at": "2026-11-03T14:34:09+00:00",
+      "last_live": "2026-11-03T14:34:09+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2186,
+      "api_observation_count": 2
+    },
+    {
+      "depart": "2027-01-31",
+      "return_date": "2027-04-21",
+      "api_last_checked_at": "2026-11-03T12:04:56+00:00",
+      "last_live": "2026-11-03T12:04:56+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2281,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-31",
+      "return_date": "2027-04-22",
+      "api_last_checked_at": "2026-11-03T12:06:39+00:00",
+      "last_live": "2026-11-03T12:06:39+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2439,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-31",
+      "return_date": "2027-04-23",
+      "api_last_checked_at": "2026-11-03T12:08:17+00:00",
+      "last_live": "2026-11-03T12:08:17+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2233,
+      "api_observation_count": 3
+    },
+    {
+      "depart": "2027-01-31",
+      "return_date": "2027-04-24",
+      "api_last_checked_at": "2026-11-03T12:09:57+00:00",
+      "last_live": "2026-11-03T12:09:57+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2326,
+      "api_observation_count": 3
+    },
+    {
+      "depart": "2027-01-31",
+      "return_date": "2027-04-25",
+      "api_last_checked_at": "2026-11-03T12:11:16+00:00",
+      "last_live": "2026-11-03T12:11:16+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2290,
+      "api_observation_count": 5
+    },
+    {
+      "depart": "2027-01-31",
+      "return_date": "2027-04-26",
+      "api_last_checked_at": "2026-11-03T14:29:37+00:00",
+      "last_live": "2026-11-03T14:29:37+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2403,
+      "api_observation_count": 3
+    },
+    {
+      "depart": "2027-01-31",
+      "return_date": "2027-04-27",
+      "api_last_checked_at": "2026-11-03T14:31:09+00:00",
+      "last_live": "2026-11-03T14:31:09+00:00",
+      "live_status": "no_eligible_itinerary",
+      "live_price": null,
+      "api_observation_count": 0
+    },
+    {
+      "depart": "2027-01-31",
+      "return_date": "2027-04-28",
+      "api_last_checked_at": "2026-11-03T14:32:48+00:00",
+      "last_live": "2026-11-03T14:32:48+00:00",
+      "live_status": "provider_empty_unverified",
+      "live_price": null,
+      "api_observation_count": 0
+    },
+    {
+      "depart": "2027-01-31",
+      "return_date": "2027-04-29",
+      "api_last_checked_at": "2026-11-03T14:33:51+00:00",
+      "last_live": "2026-11-03T14:33:51+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2233,
+      "api_observation_count": 4
+    },
+    {
+      "depart": "2027-01-31",
+      "return_date": "2027-04-30",
+      "api_last_checked_at": "2026-11-03T14:34:29+00:00",
+      "last_live": "2026-11-03T14:34:29+00:00",
+      "live_status": "verified_itinerary",
+      "live_price": 2233,
+      "api_observation_count": 4
+    }
+  ],
+  "pairs_attempted": 54,
+  "pairs_with_valid_fares": 44,
+  "latest_diagnostic": {
+    "id": 60,
+    "at_utc": "2026-11-03T14:34:29+00:00",
+    "depart": "2027-01-31",
+    "return_date": "2027-04-30",
+    "status": "eligible_found",
+    "raw_pairs": 5,
+    "eligible": 4,
+    "detail": "{\"eligible\": 4, \"outbound_rows\": 13, \"provider\": \"serpapi_google_flights\", \"provider_status\": \"eligible_found\", \"raw_pairs\": 5, \"rejected_returns\": 1, \"return_rows\": 5, \"status\": \"eligible_found\"}"
+  },
+  "recent_api_prices": [
+    {
+      "depart": "2027-01-31",
+      "return_date": "2027-04-30",
+      "price_cad": 2743,
+      "outbound_min": 1525,
+      "inbound_min": 1688,
+      "source": "serpapi_google_flights",
+      "verification": "live_search_not_checkout"
+    },
+    {
+      "depart": "2027-01-31",
+      "return_date": "2027-04-30",
+      "price_cad": 2269,
+      "outbound_min": 1525,
+      "inbound_min": 1702,
+      "source": "serpapi_google_flights",
+      "verification": "live_search_not_checkout"
+    },
+    {
+      "depart": "2027-01-31",
+      "return_date": "2027-04-30",
+      "price_cad": 2233,
+      "outbound_min": 1525,
+      "inbound_min": 1832,
+      "source": "serpapi_google_flights",
+      "verification": "live_search_not_checkout"
+    },
+    {
+      "depart": "2027-01-31",
+      "return_date": "2027-04-30",
+      "price_cad": 2233,
+      "outbound_min": 1525,
+      "inbound_min": 1690,
+      "source": "serpapi_google_flights",
+      "verification": "live_search_not_checkout"
+    },
+    {
+      "depart": "2027-01-30",
+      "return_date": "2027-04-30",
+      "price_cad": 2735,
+      "outbound_min": 1860,
+      "inbound_min": 1575,
+      "source": "serpapi_google_flights",
+      "verification": "live_search_not_checkout"
+    }
+  ]
+}
