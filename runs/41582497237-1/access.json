@@ -1,0 +1,57 @@
+{
+  "sources": [
+    {
+      "url": "https://serpapi.com/pricing",
+      "status": 200,
+      "excerpts": [
+        "es per month 6,000 throughput per hour U.S. Legal Shield Flexible options for every stage Start for free, upgrade as you grow, or contact our team about an enterprise plan tailored to your volume, performance, and compliance needs. View all plans Free $ 0 / month Get started 250 searches per month 50 throughput per hour U.S. Legal S",
+        "about an enterprise plan tailored to your volume, performance, and compliance needs. View all plans Free $ 0 / month Get started 250 searches per month 50 throughput per hour U.S. Legal Shield ZeroTrace Mode Priority support Enterprise Contact sales for pricing contact@serpapi.com Contact us Custom searches per month Custom throughp",
+        "eplenished, your renewal date will be updated, and your searches will reset at the start of the new billing cycle. What's your refund policy? We offer a full refund within 7 days of the date you subscribed to a plan unless you've used more than 20% of your searches. APIs Google Search API Google Light Search API Google AI Mode API G"
+      ]
+    },
+    {
+      "url": "https://serpapi.com/google-flights-api",
+      "status": 200,
+      "excerpts": [
+        "id is a string that starts with /m/ or /g/ . You can search for a location on Wikidata and use its \"Freebase ID\" as the location kgmid. For example, /m/0vzm is the location kgmid for Austin, TX. You can specify multiple departure airports by separating them with a comma. For example, CDG,ORY,/m/04jpl . arrival_id Optional Parameter ",
+        "id is a string that starts with /m/ or /g/ . You can search for a location on Wikidata and use its \"Freebase ID\" as the location kgmid. For example, /m/0vzm is the location kgmid for Austin, TX. You can specify multiple arrival airports by separating them with a comma. For example, CDG,ORY,/m/04jpl . Localization gl Optional Paramet",
+        "t to false . exclude_basic Optional Set to true to exclude basic results. Resulting fares will have free seat selection and carry on bags. Default to false . As of now, this filter only works for domestic flights in the US. Parameter can only be used when gl is us and travel_class is 1 deep_search Optional Set to true to enable deep",
+        "y if the query and all parameters are exactly the same. Cache expires after 1h. Cached searches are free, and are not counted towards your searches per month. It can be set to false (default) to allow results from the cache, or true to disallow results from the cache. no_cache and async parameters should not be used together. async ",
+        "et_also_sold_by\": [ \"Korean Air\" ], \"legroom\": \"31 in\", \"extensions\": [ \"Average legroom (31 in)\", \"Free Wi-Fi\", \"In-seat power & USB outlets\", \"Live TV\", \"Carbon emissions estimate: 109 kg\" ] } ], \"layovers\": [ { \"duration\": 700, \"name\": \"Incheon International Airport\", \"id\": \"ICN\", \"overnight\": true }, { \"duration\": 189, \"name\": \"",
+        "conomy (exclude basic)) Use exclude_basic to filter Economy flights which include carry-on bags and free seat selection. JSON Example { \"search_metadata\": { \"id\": \"68d55f17fc8a2b590a866dc5\", \"status\": \"Success\", \"json_endpoint\": \"https://www.serpapi.com/searches/247809397c7209a6/68d55f17fc8a2b590a866dc5.json\", \"created_at\": \"2025-09",
+        "tain the returning flight information for Round Trip (1) , you need to make another request using a departure_token . outbound_date Optional Parameter defines the outbound date. The format is YYYY-MM-DD. e.g. 2026-11-04 Parameter is required when type is 1 (Round trip) or 2 (One way), unless selected_flights_json is used. Parameter can't be us",
+        "rom the first/last segments of each leg. If supplied, they must match. Cannot be used together with departure_token , booking_token , or multi_city_json ( type = 3). Get next flights departure_token Optional Parameter is used to select the flight and get returning flights (for Round trip) or flights for the next leg of itinerary (for Multi-cit",
+        "ed together with departure_token , booking_token , or multi_city_json ( type = 3). Get next flights departure_token Optional Parameter is used to select the flight and get returning flights (for Round trip) or flights for the next leg of itinerary (for Multi-city). Find this token in the departure flight results. It cannot be used together wit",
+        "ns for the selected flights. Find this token in the flight results. It cannot be used together with departure_token . When using this token, parameters related to date and parameters inside \"Advanced filters\" section won't affect the result. SerpApi parameters engine Required Set parameter to google_flights to use the Google Flights API engine",
+        "pe\": \"Round trip\", \"airline_logo\": \"https://www.gstatic.com/flights/airline_logos/70px/multi.png\", \"departure_token\": \"W1siUEVLIiwiMjAyMy0xMC0wMyIsIkhORCIsbnVsbCwiTkgiLCI5NjIiXSxbIkhORCIsIjIwMjMtMTAtMDMiLCJMQVgiLG51bGwsIk5IIiwiMTI2Il0sWyJMQVgiLCIyMDIzLTEwLTAzIiwiQVVTIixudWxsLCJVQSIsIjIxNzUiXV0=\" }, { \"flights\": [ { \"departure_airport\": { \"name",
+        "pe\": \"Round trip\", \"airline_logo\": \"https://www.gstatic.com/flights/airline_logos/70px/multi.png\", \"departure_token\": \"W1siUEVLIiwiMjAyMy0xMC0wMyIsIklDTiIsbnVsbCwiT1oiLCIzMzIiXSxbIklDTiIsIjIwMjMtMTAtMDMiLCJTRk8iLG51bGwsIk9aIiwiMjEyIl0sWyJTRk8iLCIyMDIzLTEwLTA0IiwiQVVTIixudWxsLCJBUyIsIjUxMiJdXQ==\" }, ... ], \"other_flights\": [ { \"flights\": [ { \"d",
+        "American Spanish). Head to the Google languages page for a full list of supported Google languages. currency Optional Parameter defines the currency of the returned prices. Default to USD . Head to the Google Travel Currencies page for a full list of supported currency codes. Advanced parameters type Optional Parameter defines the type ",
+        "nguages page for a full list of supported Google languages. currency Optional Parameter defines the currency of the returned prices. Default to USD . Head to the Google Travel Currencies page for a full list of supported currency codes. Advanced parameters type Optional Parameter defines the type of the flights. Available options: 1 - R",
+        "ned prices. Default to USD . Head to the Google Travel Currencies page for a full list of supported currency codes. Advanced parameters type Optional Parameter defines the type of the flights. Available options: 1 - Round trip (default) 2 - One way 3 - Multi-city When this parameter is set to 3 , use multi_city_json to set the flight in",
+        "rture_id\": \"PEK\", \"arrival_id\": \"AUS\", \"outbound_date\": \"2023-10-03\", \"return_date\": \"2023-10-09\", \"currency\": \"USD\" }, \"best_flights\": [ { \"flights\": [ { \"departure_airport\": { \"name\": \"Beijing Capital International Airport\", \"id\": \"PEK\", \"time\": \"2023-10-03 15:10\" }, \"arrival_airport\": { \"name\": \"Haneda Airport\", \"id\": \"HND\", \"time\": ",
+        "arrival_id\": \"AUS\", \"outbound_date\": \"2025-10-14\", \"return_date\": \"2025-10-21\", \"travel_class\": 1, \"currency\": \"USD\", \"exclude_basic\": true }, \"best_flights\": [ { \"flights\": [ { \"departure_airport\": { \"name\": \"Los Angeles International Airport\", \"id\": \"LAX\", \"time\": \"2025-10-14 11:30\" }, \"arrival_airport\": { \"name\": \"Austin-Bergstrom In",
+        "the flight and typical value, in percent\", }, \"price\": \"Integer - This ticket price in the selected currency, the default currency is USD\", \"type\": \"String - The type of the flight. It's a reflection of the request parameter `type`\", \"airline_logo\": \"String - URL to the logo of mixed airlines\", \"extensions\": \"Array - A list of features ",
+        "Advanced parameters type Optional Parameter defines the type of the flights. Available options: 1 - Round trip (default) 2 - One way 3 - Multi-city When this parameter is set to 3 , use multi_city_json to set the flight information. To obtain the returning flight information for Round Trip (1) , you need to make another request using a de",
+        ", use multi_city_json to set the flight information. To obtain the returning flight information for Round Trip (1) , you need to make another request using a departure_token . outbound_date Optional Parameter defines the outbound date. The format is YYYY-MM-DD. e.g. 2026-11-04 Parameter is required when type is 1 (Round trip) or 2 (One wa",
+        " the outbound date. The format is YYYY-MM-DD. e.g. 2026-11-04 Parameter is required when type is 1 (Round trip) or 2 (One way), unless selected_flights_json is used. Parameter can't be used when type is 3 (Multi-city). Use date inside multi_city_json instead. return_date Optional Parameter defines the return date. The format is YYYY-MM-DD",
+        "es the return date. The format is YYYY-MM-DD. e.g. 2026-11-10 Parameter is required when type is 1 (Round trip), unless selected_flights_json is used. Parameter can't be used when type is 2 (One way) or 3 (Multi-city). travel_class Optional Parameter defines the travel class. Available options: 1 - Economy (default) 2 - Premium economy 3 ",
+        "eparture, 3:00 AM - 8:00 PM arrival Parameter should only be used when type parameter is set to: 1 (Round trip) emissions Optional Parameter defines the emission level of the flight. Available options: 1 - Less emissions only layover_duration Optional Parameter defines the layover duration, in minutes. It's a string containing two comma-s",
+        "ghts departure_token Optional Parameter is used to select the flight and get returning flights (for Round trip) or flights for the next leg of itinerary (for Multi-city). Find this token in the departure flight results. It cannot be used together with booking_token . Get booking options booking_token Optional Parameter is used to get book"
+      ]
+    },
+    {
+      "url": "https://www.searchapi.io/pricing",
+      "status": 200,
+      "excerpts": [
+        "mance and scalability. What's the process for canceling a subscription plan? Cancellation is hassle-free! Access your dashboard and terminate your plan in under 30 seconds. Do you offer plans tailored to specific needs? Of course! Recognizing the diverse needs of businesses, we're open to discussions for custom plans. Please contact",
+        "tarted with SearchAPI today No credit card required. No commitment. Cancel anytime. Sign up for 100 free requests Footer Logo SearchApi Making public data accessible to everyone. Address SearchApi, LLC 447 Broadway, 2nd Floor, 376, New York, NY 10013 Email support@searchapi.io Twitter GitHub Discord APIs Google SERP API Google Rank ",
+        "ou can utilize only up to 20% of your plan's credits each hour. Get started with SearchAPI today No credit card required. No commitment. Cancel anytime. Sign up for 100 free requests Footer Logo SearchApi Making public data accessible to everyone. Address SearchApi, LLC 447 Broadway, 2nd Floor, 376, New York, NY 10013 Email support@searcha",
+        "st charges applicable? We believe in charging only for successful outcomes. Therefore, you won't be billed for failed requests. Only successful searches with a 200 status code incur charges. How fast does the SearchAPI deliver results? Experience lightning-fast results! With our SearchAPI, you'll receive real-time data in mere secon"
+      ]
+    },
+    {
+      "url": "https://www.searchapi.io/docs/google-flights",
+      "error_type": "HTTPError"
+    }
+  ]
+}
