@@ -209,3 +209,10 @@ explicit separate-ticket rejection. Tests remain synthetic until a real key is
 available. Production scanner is unchanged. Probe checks existing GitHub secret
 SERPAPI_API_KEY; absent key causes credential_missing without network requests.
 No production billing, signup or subscription change is performed.
+
+E011 actual runner outcome: 41582782842 reports credential_missing for
+SERPAPI_API_KEY. No account/flight request executed. Local stable/upstream test
+suites each have 36 passing tests; actionlint passes. Optional integration and
+hard local budget are reviewable; live gate remains blocked on a Free account
+key. Precise next experiment is the same prepared probe after a meaningful
+credential-state change. Do not repeat missing-key runs or enroll a paid plan.

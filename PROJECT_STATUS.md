@@ -135,3 +135,34 @@ and git diff --check passes. User was asked only for an existing independent
 provider account name, not secret values. Actual access is the remaining live
 prerequisite; no paid source or billing was enabled. PR_DESCRIPTION.md now reflects
 final implementation and explicitly unmet acceptance gates.
+
+## Autonomous continuation: selected zero-spend API candidate
+
+- Official Amadeus production documentation was inspected at revision
+  6ecaad720eb122f765a2f205bf948a2a300c9111: payment/billing enrollment and automatic
+  over-quota charges. Rejected autonomous enrollment under no-spending rule.
+- Independent ordinary Kiwi page experiment 41582319498 returned HTTP 403 on the
+  initial page. Stopped without retries, stealth or proxy changes; automatic
+  trigger removed. No fare data was obtained.
+- First-party access research 41582497237 confirms SerpApi Free is $0/month with
+  250 monthly searches, and documents the two-stage returning-flight API.
+  Selected this maintained API as the next optional candidate. No account created.
+- Added providers/serpapi.py, strict synthetic response validation and account
+  gate, atomic 2-search reservation, caps 8/day and 240/month, no refunds on
+  ambiguous errors. It refuses paid/unknown account plans before flight queries.
+  Production integration remains disabled pending actual response review.
+- Readiness run 41582782842 reported credential_missing for SERPAPI_API_KEY.
+  No search/account API request was made. No credential values were exposed.
+- 36 tests pass locally against each Fli version. Workflow expressions pass
+  actionlint. No new usable validated live fare, successful production scan or
+  PR is claimed. Telegram remains deferred.
+
+Precise external prerequisite: user creates/uses a SerpApi **Free** account and
+sets GitHub Actions secret SERPAPI_API_KEY. Do not select a paid upgrade, supply a
+card or paste keys in chat. Once supplied, run the prepared bounded candidate
+probe, inspect actual fare semantics and rejected fields, and integrate only
+if live validation succeeds. Same persisted fare DB must carry quota reservations
+before any production scheduling. At 240 searches/month, no more than 120 complete
+pair searches/month are budgeted (~54 days for a first 216-pair pass). Explain
+quota-deferred triggers honestly; four-hour scheduler does not guarantee a live
+query at every trigger or a fresh full-grid scan.

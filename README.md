@@ -182,3 +182,26 @@ The repository has no configured Amadeus credentials or Travelpayouts token;
 Amadeus sandbox would demonstrate integration only, not real fares. Do not enable
 production billing or substitute demo/cache results as live prices. Telegram is
 currently deferred. Current offline test count is 31 per provider version.
+
+### Selected optional API candidate (credential required)
+
+SerpApi's first-party [pricing](https://serpapi.com/pricing) currently lists a
+Free $0/month plan with 250 searches/month. The prepared optional adapter refuses
+paid/unknown plans and requires two remaining searches before a round-trip probe.
+It reserves requests conservatively, caps local usage at 8/day and 240/month,
+and never enrolls accounts or upgrades plans. This is **not yet enabled as the
+production flight provider** and has not retrieved a live fare in this task.
+
+To unblock its real test, create/use a **Free** account and add `SERPAPI_API_KEY`
+in repository **Settings → Secrets and variables → Actions**. Never paste the
+key into chat, code or logs; leave paid upgrades disabled. The runner checked
+for an existing key and reported `credential_missing` without provider calls.
+
+The agent can then run `scripts/serpapi_probe.py` in the runner and inspect its
+sanitized evidence. A probe's candidate quotes are not a completed integration.
+Before production use, validate real selected-return price/ticket semantics,
+persist quota reservations with history, and verify repeated scans. The free
+budget covers at most 120 paired searches/month, so full-grid rotation can take
+about 54 days. Do not advertise all 216 combinations freshly checked every four
+hours. Amadeus's production billing requirement and Kiwi's access denial are
+recorded in [provider eligibility](research/PROVIDER_ELIGIBILITY.md).
