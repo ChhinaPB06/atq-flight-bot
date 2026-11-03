@@ -78,3 +78,13 @@ Research and source revisions are in research/FRAMEWORK_REVIEW.md; next experime
 and its prerequisites are in research/EXPERIMENTS.md. Telegram is deferred at the
 user's request. No external agent runtime was installed and no claim of improved
 live retrieval follows from the configuration change alone.
+
+## Alternative codebase research and live execution path
+
+Reviewed five alternative codebases at pinned revisions; findings are in
+research/PROVIDER_COMPARISON.md. None is a verified drop-in solution for all
+constraints. Added outbound/selected-return fetch-stage tracing and regression
+checks against real Fli expansion logic; 26 offline tests pass per version.
+Added a bounded GitHub runner experiment that can return sanitized JSON through
+a dedicated evidence branch; this is pending execution, not proof of live fares.
+Telegram remains deferred. Continue from E005 in research/EXPERIMENTS.md.

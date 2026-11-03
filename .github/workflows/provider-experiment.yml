@@ -1,0 +1,78 @@
+name: Bounded live provider comparison
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/roundtrip-provider-persistence]
+    paths:
+      - .github/workflows/provider-experiment.yml
+      - scripts/provider_experiment.py
+permissions:
+  contents: write
+concurrency:
+  group: provider-experiment
+  cancel-in-progress: false
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      FLI_TIMEOUT: '15'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Prepare isolated provider versions
+        run: |
+          python -m venv "$RUNNER_TEMP/stable"
+          "$RUNNER_TEMP/stable/bin/pip" install -r requirements.txt
+          python -m venv "$RUNNER_TEMP/upstream"
+          "$RUNNER_TEMP/upstream/bin/pip" install 'git+https://github.com/punitarani/fli.git@881aee5ff4321e81ea2157cb44be94ce6a21dc1b'
+      - name: Compare one exact round trip
+        id: compare
+        run: |
+          mkdir -p "$RUNNER_TEMP/provider-evidence"
+          failed=0
+          for channel in stable upstream; do
+            "$RUNNER_TEMP/$channel/bin/python" -m pip check
+            "$RUNNER_TEMP/$channel/bin/python" -m unittest discover -s tests -v
+            timeout 120 "$RUNNER_TEMP/$channel/bin/python" scripts/provider_experiment.py --channel "$channel" --output "$RUNNER_TEMP/provider-evidence/$channel.json" || failed=1
+            sleep 10
+          done
+          exit "$failed"
+      - name: Publish sanitized experiment evidence
+        if: always()
+        env:
+          EXPERIMENT_RUN: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          evidence="$RUNNER_TEMP/provider-evidence"
+          if [ ! -d "$evidence" ] || [ -z "$(ls -A "$evidence")" ]; then
+            exit 0
+          fi
+          target="$RUNNER_TEMP/evidence-git"
+          mkdir "$target"
+          git init "$target"
+          git -C "$target" config include.path "$GITHUB_WORKSPACE/.git/config"
+          git -C "$target" remote add origin "$(git remote get-url origin)"
+          existing=$(git -C "$target" ls-remote --heads origin refs/heads/flight-provider-evidence)
+          if [ -n "$existing" ]; then
+            git -C "$target" fetch --depth=1 origin flight-provider-evidence
+            git -C "$target" checkout -b flight-provider-evidence FETCH_HEAD
+          else
+            git -C "$target" checkout --orphan flight-provider-evidence
+          fi
+          mkdir -p "$target/runs/$EXPERIMENT_RUN"
+          cp "$evidence/"*.json "$target/runs/$EXPERIMENT_RUN/"
+          printf '%s\n' "$GITHUB_SHA" > "$target/runs/$EXPERIMENT_RUN/source-commit.txt"
+          git -C "$target" config user.name 'github-actions[bot]'
+          git -C "$target" config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C "$target" add runs
+          git -C "$target" commit -m "Record bounded provider experiment $EXPERIMENT_RUN"
+          git -C "$target" push origin HEAD:refs/heads/flight-provider-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: provider-experiment-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/provider-evidence/*.json
+          if-no-files-found: warn
+          retention-days: 14

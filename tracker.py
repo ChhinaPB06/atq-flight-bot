@@ -10,6 +10,7 @@ import os
 import sqlite3
 import sys
 import time
+import threading
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlencode
@@ -240,8 +241,37 @@ def search_round_trip(d, r, top_n=5, diagnostic=None):
         passenger_info=m['PassengerInfo'](adults=1),
         flight_segments=[_seg(m,'YYC','ATQ',d),_seg(m,'ATQ','YYC',r)],
         seat_type=m['SeatType'].ECONOMY,sort_by=m['SortBy'].CHEAPEST)
-    raw = m['SearchFlights']().search(filt, top_n=top_n, currency='CAD', language='en-CA', country='CA')
+    # Both supported versions expose this boundary, although stable fetches RPC
+    # and pinned upstream fetches page data. Trace decoding before pairing so
+    # empty initial results and empty selected-return responses stay distinct.
+    # This uses a pinned private API; the adapter tests guard its contract.
+    events = []
+    event_lock = threading.Lock()
+
+    class TracedSearch(m['SearchFlights']):
+        def _fetch_flights(self, filters, **kwargs):
+            stage = ('selected_return' if any(
+                segment.selected_flight is not None for segment in filters.flight_segments)
+                else 'initial_outbound')
+            event = {'stage': stage}
+            try:
+                rows = super()._fetch_flights(filters, **kwargs)
+                event['decoded_rows'] = len(rows or [])
+                return rows
+            except Exception as exc:
+                event['failure'] = classify_failure(exc)
+                event['error_type'] = type(exc).__name__
+                raise
+            finally:
+                with event_lock:
+                    events.append(event)
+
+    diagnostic['fetch_events'] = events
     diagnostic['expanded_outbound_limit'] = top_n
+    raw = TracedSearch().search(filt, top_n=top_n, currency='CAD', language='en-CA', country='CA')
+    if not raw:
+        initial = sum(e.get('decoded_rows', 0) for e in events if e['stage']=='initial_outbound')
+        diagnostic['empty_stage'] = ('selected_return_expansion' if initial else 'initial_outbound')
     return classify_round_trip_results(list(raw or []), diagnostic, d, r)
 
 def classify_failure(exc):
@@ -476,7 +506,7 @@ def run(con, calendar_per_run=2, live_per_run=2, pause=10, dry_run=False):
                     errors.append(f'Travelpayouts: {type(exc).__name__}')
                     print('SECONDARY CACHE ERROR '+str(exc)[:200],file=sys.stderr,flush=True)
         except Exception as exc:
-            failure = {'provider_status': classify_failure(exc), 'error_type': type(exc).__name__}
+            failure = {**diagnostic, 'provider_status': classify_failure(exc), 'error_type': type(exc).__name__}
             persist_live_diagnostic(con,d,r,failure)
             con.execute('UPDATE pairs SET last_live=?,live_status=? WHERE depart=? AND return_date=?',
                         (utc(),failure['provider_status'],d,r))

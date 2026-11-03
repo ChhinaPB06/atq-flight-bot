@@ -45,3 +45,40 @@ next action. Never put secret values or raw authenticated request URLs here.
 - Next: compare same dates under stable after >=10 seconds, then capture sanitized
   fixtures before a parsing/pairing change. Inspect GitHub run logs when API access
   works. Telegram remains outside this immediate experiment.
+
+## E003 — alternative-provider contract audit
+
+- Hypothesis: a maintained replacement can supply both directional durations,
+  returned CAD currency and a complete RT price without paid infrastructure.
+- Experiment: clone and inspect five public candidate implementations and licenses;
+  compare their actual parser/result contracts. Inspect source, not star count.
+- Evidence: PROVIDER_COMPARISON.md records exact revisions and shortcomings.
+  FlightSearcher synthetic multisegment input with 2100-minute total outputs
+  only the first 60-minute segment in both directions. Not a live test.
+- Decision: reject those candidates as immediate drop-in replacements; retain
+  Fli provisionally, Amadeus as a credential-dependent independent candidate.
+  No evidence of a fully satisfying independent free live source yet.
+
+## E004 — identify the Fli expansion boundary
+
+- Hypothesis: tracing decoded initial and selected-return pages can distinguish
+  empty initial data from failed expansion, without changing pairing semantics.
+- Experiment: subclass the pinned _fetch_flights boundary; run real Fli expansion
+  logic with one controlled outbound followed by an empty selected-return result;
+  compare with empty initial response and transport exception cases.
+- Evidence: tests/test_provider_trace.py; all 26 offline tests pass under both
+  provider versions. Exceptions preserve stage metadata for durable diagnostics.
+- Decision: keep instrumentation; it does not fix or prove live retrieval.
+
+## E005 — pending: GitHub-hosted execution and evidence return
+
+- Hypothesis: intended GitHub runner can execute a bounded live comparison even
+  though the cloud machine cannot access Google or the GitHub API.
+- Experiment: provider-experiment.yml runs on development-branch workflow/script
+  push only, tests one pair per provider version, top_n=1, 120-second outer timeout,
+  library retries bounded, 10-second pause. Saves sanitized JSON on a separate
+  flight-provider-evidence branch with ordinary fast-forward push plus artifact.
+- Command: push workflow commit; use git ls-remote/fetch/show to inspect evidence.
+- Acceptance: only usable_live_quote with real validated fare fields advances the
+  live gate; empty/blocked/unrun remains failure/inconclusive. No notifications,
+  production DB mutations or paid services. API/CI availability is not assumed.
