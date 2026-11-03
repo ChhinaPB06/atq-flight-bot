@@ -162,3 +162,23 @@ not assuming the requested currency was honored. Use `health` independently of
 and retained database before interpreting an empty result. The independent
 Offline validation workflow tests both stable and pinned upstream without
 credentials or flight requests.
+
+### Provider research and live acceptance
+
+See [the codebase comparison](research/PROVIDER_COMPARISON.md) for five alternative
+implementations and their actual contract gaps. Bounded GitHub runner experiments
+now return sanitized JSON on the `flight-provider-evidence` branch. These reports
+are observations, not checkout proof or evidence that the full date grid is fresh.
+
+Ordinary browser experiment 41578961275 decoded seven outbound options but was
+rejected during selected-return expansion. Browser mode remains experimental;
+it is not an automatic production fallback. Diagnostic provider workflows are
+manual-only after that rejection. They stop on denial/consent and never solve
+challenges. Stable and upstream HTTP comparisons also show intermittent empty
+data. Reliable live round-trip retrieval has **not** been established.
+
+An independent source requires authorized access with verified free live quota.
+The repository has no configured Amadeus credentials or Travelpayouts token;
+Amadeus sandbox would demonstrate integration only, not real fares. Do not enable
+production billing or substitute demo/cache results as live prices. Telegram is
+currently deferred. Current offline test count is 31 per provider version.

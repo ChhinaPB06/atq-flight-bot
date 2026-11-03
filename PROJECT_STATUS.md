@@ -128,3 +128,10 @@ The scheduled main deployment is unchanged. Do not claim project completion.
   remains deferred; main scheduled workflow and repository visibility unchanged.
 - Remaining gates: new usable validated live quote, repeated real production
   history persistence, successful scan CI, PR, later Telegram delivery.
+
+Final local verification for this research iteration: 31 tests pass under each
+provider dependency, all workflows pass checksum-verified actionlint v1.7.7,
+and git diff --check passes. User was asked only for an existing independent
+provider account name, not secret values. Actual access is the remaining live
+prerequisite; no paid source or billing was enabled. PR_DESCRIPTION.md now reflects
+final implementation and explicitly unmet acceptance gates.
