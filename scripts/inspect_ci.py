@@ -17,7 +17,7 @@ def command(args):
 
 def inspect_run(run):
     result=command(['gh','api',f'repos/{REPO}/actions/runs/{run}/logs'])
-    report={'run_id':run,'log_fetch_exit':result.returncode,'health':[],'live':[]}
+    report={'run_id':run,'log_fetch_exit':result.returncode,'health':[],'live':[], 'test_failures':[]}
     if result.returncode:return report
     with zipfile.ZipFile(io.BytesIO(result.stdout)) as archive:
         for name in archive.namelist():
@@ -27,6 +27,12 @@ def inspect_run(run):
                 # Verbose unit tests print fixture health on the test-name line.
                 # Accept only standalone structured events after a log timestamp.
                 line=re.sub(r'^\d{4}-\d{2}-\d{2}T\S+\s+', '', line)
+                if re.match(r'^(?:FAIL:|ERROR:|AssertionError:|ImportError:|ModuleNotFoundError:|KeyError:|ValueError:|SyntaxError:|TypeError:|RuntimeError:|FAILED \(|Ran \d+ tests)',line):
+                    # Only bounded error/test summaries, never raw logs or credentials.
+                    if not re.search(r'api_key|token|secret|https?://',line,re.I):
+                        summary={'log_file':name,'summary':line[:500]}
+                        if summary not in report['test_failures'] and len(report['test_failures'])<30:
+                            report['test_failures'].append(summary)
                 for marker,key in [('PROVIDER HEALTH ','health'),('LIVE DIAGNOSTIC ','live')]:
                     if not line.startswith(marker):continue
                     try: data=json.loads(line.split(marker,1)[1])
@@ -60,7 +66,7 @@ def review():
 if __name__=='__main__':
     report={'credential_presence':{name:bool(os.getenv(name)) for name in (
         'AMADEUS_CLIENT_ID','AMADEUS_CLIENT_SECRET','TRAVELPAYOUTS_TOKEN')},
-        'historical_runs':[inspect_run(run) for run in (41573652801,41574283529,41574548188)],
+        'historical_runs':[inspect_run(run) for run in (41654833453,41654025980)],
         'pull_request': review() if os.getenv('PREPARE_REVIEW')=='1' else {
             'outcome':'repository_disallows_actions_pr_creation',
             'evidence_run':41579361074, 'retry_attempted':False}}
