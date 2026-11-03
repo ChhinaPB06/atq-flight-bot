@@ -57,3 +57,15 @@ re-inspected logs. Telegram delivery and remote CI have not been demonstrated.
 5. Observe matrix CI and an actual scan workflow; reconcile acceptance evidence.
 6. Merge only after review. This branch does not change the scheduled main job
    until merged. Do not describe the empty-return root cause as repaired yet.
+
+## Delivery checkpoint
+
+- Pushed `fix/roundtrip-provider-persistence`, implementation commit `2dd05bb`.
+- GitHub suggested its pull-request creation URL, but `gh pr create` failed:
+  POST api.github.com/graphql Forbidden. **No PR was created.** Prepared review
+  text is in PR_DESCRIPTION.md. `gh run list` also failed with Forbidden, so remote
+  CI status is unknown. HTTPS Git push works; do not infer API readiness from it.
+- Current runtime policy was rechecked after draft save: allowed_hosts remains
+  empty. Draft persistence is confirmed; runtime application/publication is not.
+- Final local checks: 24 tests pass in each provider environment, git diff --check
+  passes, no modifications to tracked fare history.

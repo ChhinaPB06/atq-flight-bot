@@ -1,0 +1,7 @@
+Round-trip scans could accept quotes without checking returned currency or itinerary identity, and failed requests did not advance detailed coverage/rotation. SQLite persistence also rebased a binary database onto main, risking conflicts with code updates.
+
+This change validates returned CAD currency and route/date identity, preserves above-threshold observations, records failed detailed attempts, stops scan traffic after failed provider health, and labels cumulative coverage and realistic cycle duration. History is saved with SQLite backup/integrity checks to a separate flight-data branch using fast-forward-only pushes, with recovery artifacts and workflow summaries. An independent offline CI matrix covers stable and pinned upstream Fli.
+
+Validation: 24 local tests pass against flights==0.9.0 and upstream 881aee5ff4321e81ea2157cb44be94ce6a21dc1b. Tests cover wrong currency/date/route rejection, above-threshold history, repeated persistence restores and saves, stale-writer rejection, failure rotation, health gating, and notification dedup/drop/retry behavior.
+
+Not complete: the reported empty round-trip retrieval problem remains unresolved. Stable live health and pinned upstream Jan 25–Apr 16 round-trip checks were blocked by the cloud proxy (CONNECT 403). No new live fares or Telegram delivery were verified. GitHub API access was Forbidden, so prior Actions logs could not be re-inspected. See PROJECT_STATUS.md for evidence, decisions and next steps. Do not merge on green offline tests alone as proof of live operation.
