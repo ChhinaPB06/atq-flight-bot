@@ -1,0 +1,30 @@
+{
+  "adults": 1,
+  "cabin": "economy",
+  "channel": "upstream",
+  "checkout_verified": false,
+  "depart": "2027-01-25",
+  "diagnostic": {
+    "eligible": 0,
+    "empty_stage": "initial_outbound",
+    "examples": [],
+    "expanded_outbound_limit": 1,
+    "fetch_events": [
+      {
+        "decoded_rows": 0,
+        "stage": "initial_outbound"
+      }
+    ],
+    "provider_status": "empty_response",
+    "raw_pairs": 0,
+    "rejected": {}
+  },
+  "distribution_version": "0.10.0",
+  "eligible_count": 0,
+  "observed_at_utc": "2026-11-03T04:26:50+00:00",
+  "outcome": "no_usable_quote",
+  "requested_currency": "CAD",
+  "return_date": "2027-04-16",
+  "sample_offers": [],
+  "top_n": 1
+}
