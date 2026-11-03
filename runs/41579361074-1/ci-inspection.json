@@ -1,0 +1,147 @@
+{
+  "credential_presence": {
+    "AMADEUS_CLIENT_ID": false,
+    "AMADEUS_CLIENT_SECRET": false,
+    "TRAVELPAYOUTS_TOKEN": false
+  },
+  "historical_runs": [
+    {
+      "health": [],
+      "live": [
+        {
+          "depart": "2027-01-25",
+          "eligible": 8,
+          "provider_status": "eligible_found",
+          "raw_pairs": 8,
+          "rejected": {},
+          "return_date": "2027-04-16"
+        },
+        {
+          "depart": "2027-01-27",
+          "eligible": 0,
+          "provider_status": "empty_response",
+          "raw_pairs": 0,
+          "rejected": {},
+          "return_date": "2027-04-16"
+        }
+      ],
+      "log_fetch_exit": 0,
+      "run_id": 41573652801
+    },
+    {
+      "health": [
+        {
+          "probes": {
+            "control": {
+              "error": null,
+              "returned": 12,
+              "route": null
+            },
+            "outbound": {
+              "error": null,
+              "returned": 7,
+              "route": null
+            },
+            "return": {
+              "error": null,
+              "returned": 3,
+              "route": null
+            }
+          },
+          "status": "one_way_routes_healthy"
+        },
+        {
+          "probes": {
+            "control": {
+              "error": null,
+              "returned": 20,
+              "route": "JFK-LHR"
+            },
+            "outbound": {
+              "error": null,
+              "returned": 11,
+              "route": "YYC-ATQ"
+            },
+            "return": {
+              "error": null,
+              "returned": 15,
+              "route": "ATQ-YYC"
+            }
+          },
+          "status": "one_way_routes_healthy"
+        }
+      ],
+      "live": [],
+      "log_fetch_exit": 0,
+      "run_id": 41574283529
+    },
+    {
+      "health": [
+        {
+          "probes": {
+            "control": {
+              "error": null,
+              "returned": 12,
+              "route": null
+            },
+            "outbound": {
+              "error": null,
+              "returned": 7,
+              "route": null
+            },
+            "return": {
+              "error": null,
+              "returned": 3,
+              "route": null
+            }
+          },
+          "status": "one_way_routes_healthy"
+        },
+        {
+          "probes": {
+            "control": {
+              "error": null,
+              "returned": 20,
+              "route": "JFK-LHR"
+            },
+            "outbound": {
+              "error": null,
+              "returned": 11,
+              "route": "YYC-ATQ"
+            },
+            "return": {
+              "error": null,
+              "returned": 15,
+              "route": "ATQ-YYC"
+            }
+          },
+          "status": "one_way_routes_healthy"
+        }
+      ],
+      "live": [
+        {
+          "depart": "2027-01-27",
+          "eligible": 0,
+          "provider_status": "empty_response",
+          "raw_pairs": 0,
+          "rejected": {},
+          "return_date": "2027-04-12"
+        },
+        {
+          "depart": "2027-01-27",
+          "eligible": 0,
+          "provider_status": "empty_response",
+          "raw_pairs": 0,
+          "rejected": {},
+          "return_date": "2027-04-18"
+        }
+      ],
+      "log_fetch_exit": 0,
+      "run_id": 41574548188
+    }
+  ],
+  "pull_request": {
+    "exit_code": 1,
+    "outcome": "repository_disallows_actions_pr_creation"
+  }
+}
