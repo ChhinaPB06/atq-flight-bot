@@ -1,0 +1,25 @@
+name: Prepare development pull request
+on:
+  push:
+    branches: [fix/roundtrip-provider-persistence]
+    paths: [.github/workflows/prepare-review.yml]
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - name: Create draft for authorized development branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ChhinaPB06/atq-flight-bot
+        run: |
+          existing=$(gh pr list --head fix/roundtrip-provider-persistence --base main --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh pr edit "$existing" --body-file PR_DESCRIPTION.md
+          else
+            gh pr create --draft --base main --head fix/roundtrip-provider-persistence --title 'Repair provider validation and durable flight history' --body-file PR_DESCRIPTION.md
+          fi
