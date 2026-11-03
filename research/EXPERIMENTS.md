@@ -163,3 +163,10 @@ free live-data allowance and securely configured credentials. Amadeus is a
 candidate, not a verified free production entitlement. Sandbox is insufficient.
 Asked user for existing provider account name only; never request tokens in chat.
 Automatic experiment push trigger removed; no accidental new provider requests.
+
+E008 follow-up: some unit fixtures emitted standalone health lines too. A
+standalone-line filter alone was insufficient. Require route identity in every
+health probe before admitting it as live-route evidence; the fixture's 12/7/3
+has no routes, while actual 20/11/15 has JFK-LHR, YYC-ATQ and ATQ-YYC. Regression
+now covers both inline and standalone fixture contamination. Incomplete records
+are conservatively excluded, not promoted to verified route health.

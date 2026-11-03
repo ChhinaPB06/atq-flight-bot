@@ -32,6 +32,9 @@ def inspect_run(run):
                     try: data=json.loads(line.split(marker,1)[1])
                     except ValueError:continue
                     if key=='health':
+                        probes=data.get('probes',{})
+                        if not probes or not all(v.get('route') for v in probes.values()):
+                            continue  # incomplete/test-only records cannot prove route health
                         data={'status':data.get('status'),'probes':{k:{f:v.get(f) for f in ('route','returned','error')} for k,v in data.get('probes',{}).items()}}
                     else:
                         data={k:data.get(k) for k in ('depart','return_date','raw_pairs','eligible','rejected','provider_status')}
