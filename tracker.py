@@ -163,29 +163,64 @@ def discover_stay(stay):
     return result
 
 
-def search_round_trip(d,r, top_n=3):
-    """Live *search* offers, not final seller checkout prices.
+def classify_round_trip_results(raw, diagnostic):
+    """Keep provider failures, invalid shapes and hard filters separate.
 
-    Fli README documents tuples (outbound, return) and outbound.price as total.
+    The provider search price is NOT a checkout-confirmed price.
     """
-    m=_fli()
-    filt=m['FlightSearchFilters'](trip_type=m['TripType'].ROUND_TRIP,
+    offers = []
+    diagnostic.update(raw_pairs=0, eligible=0, rejected={}, examples=[])
+    for pair in raw:
+        diagnostic['raw_pairs'] += 1
+        if not isinstance(pair, (tuple, list)) or len(pair) != 2:
+            reason = 'unexpected_provider_shape'
+            observed = {'type': type(pair).__name__}
+        else:
+            a, b = flight_info(pair[0]), flight_info(pair[1])
+            total = a['price']
+            observed = {'price_cad': total, 'outbound_min': a['duration'], 'inbound_min': b['duration']}
+            if total is None:
+                reason = 'missing_or_invalid_roundtrip_price'
+            elif a['duration'] is None or b['duration'] is None:
+                reason = 'missing_duration'
+            elif a['duration'] <= 0 or b['duration'] <= 0:
+                reason = 'invalid_duration'
+            elif a['duration'] > MAX_MINS and b['duration'] > MAX_MINS:
+                reason = 'both_directions_over_31h'
+            elif a['duration'] > MAX_MINS:
+                reason = 'outbound_over_31h'
+            elif b['duration'] > MAX_MINS:
+                reason = 'return_over_31h'
+            else:
+                reason = None
+                offers.append({'price_cad': total, 'outbound_min': a['duration'],
+                    'inbound_min': b['duration'], 'outbound': a['legs'], 'return': b['legs']})
+        if reason:
+            diagnostic['rejected'][reason] = diagnostic['rejected'].get(reason, 0) + 1
+            if len(diagnostic['examples']) < 8:
+                diagnostic['examples'].append({'reason':reason, **observed})
+    diagnostic['eligible'] = len(offers)
+    diagnostic['provider_status'] = ('empty_response' if not diagnostic['raw_pairs'] else
+                                     'all_rejected' if not offers else 'eligible_found')
+    return offers
+
+
+def search_round_trip(d, r, top_n=5, diagnostic=None):
+    """Search up to five outbound choices; report raw counts and rejection reasons.
+
+    This is NOT final checkout verification. Increase top_n only within acceptable
+    provider limits, not as a way to bypass rate controls.
+    """
+    if diagnostic is None:
+        diagnostic = {}
+    m = _fli()
+    filt = m['FlightSearchFilters'](trip_type=m['TripType'].ROUND_TRIP,
         passenger_info=m['PassengerInfo'](adults=1),
         flight_segments=[_seg(m,'YYC','ATQ',d),_seg(m,'ATQ','YYC',r)],
         seat_type=m['SeatType'].ECONOMY,sort_by=m['SortBy'].CHEAPEST)
-    # Expand up to top_n outbound candidates to obtain paired return itineraries.
-    result=m['SearchFlights']().search(filt, top_n=top_n, currency='CAD', language='en-CA', country='CA') or []
-    out=[]
-    for pair in list(result):
-        if not isinstance(pair,(tuple,list)) or len(pair)!=2: continue
-        a,b=flight_info(pair[0]),flight_info(pair[1])
-        # Fli current docs describe outbound.price as total RT fare.
-        total=a['price']
-        if not valid_itinerary(total,a['duration'],b['duration']):continue
-        out.append({'price_cad':total,'outbound_min':a['duration'],
-                    'inbound_min':b['duration'],'outbound':a['legs'],'return':b['legs']})
-    return out
-
+    raw = m['SearchFlights']().search(filt, top_n=top_n, currency='CAD', language='en-CA', country='CA')
+    diagnostic['expanded_outbound_limit'] = top_n
+    return classify_round_trip_results(list(raw or []), diagnostic)
 
 def record_discovery(con,stay,found):
     now=utc()
@@ -219,7 +254,7 @@ def choose_stays(con,per_run):
 def choose_live(con,limit):
     """Prioritize low calendar quotes; bootstrap live searches without calendar data."""
     query = """SELECT * FROM pairs WHERE
-        (last_live IS NULL OR last_live < datetime('now','-24 hours'))
+        (last_live IS NULL OR julianday(last_live) < julianday('now','-24 hours'))
         ORDER BY CASE WHEN discovery_price IS NOT NULL AND discovery_price<=? THEN 0
                       WHEN discovery_price IS NOT NULL THEN 1 ELSE 2 END,
         CASE WHEN depart='2027-01-27' THEN 0 ELSE 1 END,
@@ -273,21 +308,26 @@ def run(con, calendar_per_run=2, live_per_run=1, pause=10, dry_run=False):
             log(con,'calendar_ok',f'{stay}: {len(res)} quotes')
         except Exception as exc:
             log(con,'calendar_error',f'{stay}: {type(exc).__name__}: {str(exc)[:300]}')
-            print(f'Calendar duration {stay} failed: {exc}',file=sys.stderr)
+            print(f'CALENDAR PROVIDER ERROR duration {stay}: {type(exc).__name__}: {exc}',file=sys.stderr,flush=True)
         time.sleep(max(0,pause))
+    errors = []
     for row in choose_live(con,live_per_run):
         d,r=row['depart'],row['return_date']
+        diagnostic = {}
         try:
-            offers=search_round_trip(d,r)
+            offers=search_round_trip(d,r,top_n=5,diagnostic=diagnostic)
             record_live(con,d,r,offers)
             for item in offers:maybe_alert(con,d,r,item)
-            log(con,'live_ok',f'{d}/{r} offers={len(offers)}')
-            print(f'Live search {d}/{r}: {len(offers)} eligible offers')
+            diagnostic.update(depart=d,return_date=r)
+            log(con,'live_diagnostic',json.dumps(diagnostic,sort_keys=True))
+            print('LIVE DIAGNOSTIC '+json.dumps(diagnostic,sort_keys=True),flush=True)
         except Exception as exc:
             log(con,'live_error',f'{d}/{r}: {type(exc).__name__}: {str(exc)[:300]}')
-            print(f'Live search failed {d}/{r}: {exc}',file=sys.stderr)
+            errors.append(f'Live {d}/{r}: {exc}')
+            print(f'LIVE PROVIDER ERROR {d}/{r}: {type(exc).__name__}: {exc}',file=sys.stderr,flush=True)
         time.sleep(max(0,pause))
-
+    if errors:
+        raise RuntimeError('Provider searches failed; see live_error operations: '+ '; '.join(errors)[:500])
 
 def status(con):
     total=con.execute('SELECT COUNT(*) FROM pairs').fetchone()[0]
