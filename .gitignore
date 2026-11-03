@@ -2,3 +2,7 @@ __pycache__/
 .pytest_cache/
 .env
 *.pyc
+
+# Private native alert exports belong outside source control.
+*.eml
+*.msg

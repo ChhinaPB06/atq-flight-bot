@@ -340,3 +340,16 @@ unobserved fare state; bulk/event feeds could reduce request counts in principle
 Generated54native datewatch links via native_alert_setup.py; no alerts/accounts/
 inbox access created. Repo parsers have currency/template/contract gaps. No
 paid model/service/cloud, new keys, flight queries or provider-block retries.
+
+## E018 — authorized native-alert pilot implementation
+
+User said go ahead with proposed free method. Implemented local .eml import,
+strict route/date/year/CAD-cent validation, unverified event storage/dedup and
+explicit Free-API verification with shared quota and actual fare recording.
+No inbox/browser connector is available; no Google watch or inbox was accessed.
+No notification or actual API request made for the pilot.54tests pass with
+synthetic email fixtures; CLI duplicate import smoke passed. Real email template
+and real end-to-end pilot remain blocked on one approved exported native alert
+and a user-enabled watch. Exact setup/missing input inNATIVE_ALERT_PILOT.md.
+No source signal may be promoted to a live quote merely because parsing passes.
+Current production scanner is unchanged; pilot is staged for review/real fixture.
