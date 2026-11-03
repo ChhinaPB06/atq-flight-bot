@@ -1,0 +1,31 @@
+{
+  "provider": "serpapi_google_flights",
+  "checkout_verified": false,
+  "outcome": "blocked_or_failed",
+  "error_type": "ProviderAccessError",
+  "account_metadata": {
+    "plan_name": "Free Plan",
+    "plan_id": "free",
+    "searches_per_month": 250,
+    "total_searches_left": 250,
+    "field_names": [
+      "account_email",
+      "account_id",
+      "account_rate_limit_per_hour",
+      "account_status",
+      "api_key",
+      "extra_credits",
+      "last_hour_searches",
+      "plan_id",
+      "plan_monthly_price",
+      "plan_name",
+      "plan_renewal_date",
+      "plan_searches_left",
+      "searches_per_month",
+      "this_hour_searches",
+      "this_month_usage",
+      "total_searches_left"
+    ]
+  },
+  "safe_reason": "Only an explicitly confirmed Free account is allowed"
+}
