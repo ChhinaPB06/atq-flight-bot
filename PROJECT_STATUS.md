@@ -15,8 +15,17 @@ Real immutable snapshot remains147observations,54completedpairchecks,44usable
 pairs,5empty,5filtered and112reservedsearches. Current-rule audit134quotes and
 independent268normalized-journey replay pass; replay is not fresh provider data.
 Actual-history atomic backup preserves allcounts and integrityok. Specialists
-made no provider/inbox calls and spent no flight quota. Integrated remote CI and
-deployment remain to be verified. See research/INDEPENDENT_ACCEPTANCE.md.
+made no provider/inbox calls and spent no flight quota. Integrated development
+CI41670104760, mainCI41670336088 and production41670336017 passed. Main was
+normally fast-forwarded c58a69e→8f87ab3. The first integration commit omitted
+tracker.py; its follow-up included it before the complete candidate passed CI
+and was deployed. See research/INDEPENDENT_ACCEPTANCE.md.
+
+Post-deployment history comparison is exact:147observations unchanged,112search
+reservations,54checks and lastAPIcheck14:34:29UTC. At16:04:26UTC the new scanner
+persisted scan_idle with an explicit no-provider-request reason; that successful
+workflow did not search all54again. Refreshed16:05UTC audit has23pairs quoted
+within4hours, illustrating why cumulative coverage and freshness stay separate.
 
 Genuine remaining gates: approved real native email and authorized ingestion,
 unverified54Googlewatches, Free allowance insufficient for full54pair4hrefresh,

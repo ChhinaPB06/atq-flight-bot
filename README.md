@@ -138,9 +138,10 @@ records only the user's reported checkout observation, never an independent chec
   active first-pass coverage6/54 before the main sweep.
 - Best observed at that checkpoint: **CAD2245,Jan27–Apr20**,83days,
   **25h25m outbound /28h10m return**, search quote only. New scans may change it.
-- **88offline tests** pass locally under stable and upstream after the specialist
-  review; current remote validation is recorded in PROJECT_STATUS.md. The earlier
-  58test baseline passed remoteCI41656960169. Tests alone are not live fare proof.
+- **88offline tests** pass locally and remotely under stable and upstream after
+  specialist review (mainCI41670336088). Production41670336017 passed updated
+  restore/save with an explicit idle/no-provider-request outcome. Tests and an
+  idle run are not fresh live fare proof.
 
 Inspect Actions summaries, LIVE DIAGNOSTIC, COVERAGE, saved history and the
 flight-provider-evidence branch. Run `python tracker.py status` against a restored

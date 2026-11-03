@@ -109,3 +109,19 @@ and account terms remain separate from an open-source wrapper's license.
 
 These are evidence/entitlement/account gates, not problems that can be solved by
 claiming additional agents are continuously running after the session ends.
+
+## Post-review coordinator evidence
+
+This section was added by the coordinator after the independent review and
+supersedes the table's pending integrated-CI/persistence items. Complete source
+8f87ab3 passed developmentCI41670104760 and mainCI41670336088 (88tests per
+dependency channel); production41670336017 also passed. Normal mainfastforward
+deployed the fixes without a force push or account-policy change.
+
+Read-only comparison of the deployed durable DB against the pre-team snapshot
+found exactly the same147observations,54completedpairchecks and112reserved
+searches. The new scanner saved scan_idle at16:04:26UTC, explicitly stating that
+no provider request was made. It exercised the updated restore/save path but is
+not a fresh provider retest. Refreshed16:05UTC audit still validates134quotes
+across44pairs;23pairs had prices observed within4hours then. Other external and
+deferred gates remain as stated above; overall acceptance is not complete.
