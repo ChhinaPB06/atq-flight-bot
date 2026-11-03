@@ -190,3 +190,26 @@ Main is NOT updated; scheduled deployment requires review/merge. PR creation
 remains externally blocked by Actions PR-creation policy. User can create the
 prepared PR at github.com/ChhinaPB06/atq-flight-bot/pull/new/fix/roundtrip-provider-persistence.
 Telegram remains deferred. Do not call all acceptance criteria complete.
+
+## Latest scope and activation
+
+User narrowed departures to Jan27–31 and returns80–90days later, retainingApr30
+cutoff:54eligiblepairs. Earlier coverage metadata is archived and fare history
+preserved; new coverage excludes out-of-scope diagnostics. Live run41588472235
+scannedJan27/Apr20 andApr21 successfully. Lowest valid quote isCAD2245 onJan27/
+Apr20 (83days), conservative total durations1525/1690minutes. These are search
+quotes, not checkout-confirmed. Batch validation41589012699 passed, coverage6/54.
+
+Initial sweep now attempts at most18pairs/trigger, within40searches/rollinghour,
+120/day during firstpass and240/month; account mustremainFree/$0. Once all54
+pairs have an API attempt, steady cap4searches/day allows2pairs/day so the monthly
+Free allowance lasts. Stop/defer on rate/quota restrictions. Initial full sweep
+costs at most108searches; this does not mean full-grid refresh every4hours.
+
+At user's renewed autonomous request for an operational four-hour schedule,
+main was activated by normal fast-forward push to9c98fd9, preserving history;
+no force, branch-protection bypass or account policy change. Actions PR creation
+remains disabled; no PR was fabricated. Telegram remains disabled/deferred.
+A main-workflow configuration push event permits one immediate operational scan
+as well as the unchanged '23 */4 * * *' cron; future ordinary source/docs pushes
+will not trigger flight queries. Main workflow completion is to be observed.

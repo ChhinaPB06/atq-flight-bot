@@ -228,3 +228,24 @@ main yet. GitHub disallows Actions-created PRs. Open the prepared development PR
 review and merge before expecting scheduled main to use this provider. The
 existing main deployment still uses its old provider until then. Telegram was
 explicitly disabled during integration validation and remains deferred.
+
+## Current scope and running schedule (supersedes earlier date-grid notes)
+
+Active departures are **Jan27–31,2027**, returns **80–90days later**, no later
+thanApr30: **54pairs**. Previous observations are preserved, while old pair
+metadata is archived. The current best observed eligible quote isCAD2245,
+Jan27–Apr20,83days; outbound25h25m and return28h10m. Search quote only.
+
+The tested code is now on main. Cron remains `23 */4 * * *` (every4hours;
+GitHub can delay execution). Initial sweep uses up to18pairs per trigger, capped
+at40APIsearches/rollinghour and240/month. The first54pair sweep costs up to108
+searches; it may need several triggers or quota deferrals. After first-pass
+attempts finish, steady cap is2pairs/day within the free budget. Four-hour
+workflow executions do not guarantee a fresh54pair sweep each time. API failure,
+empty/rejected results and quota-deferred checks are reported separately.
+
+Telegram is explicitly disabled during this research phase. No booking/payment.
+Main history is on flight-data, independent of code. Workflow configurations can
+trigger an immediate scan on main; ordinary source/doc pushes do not. The
+research/status log records the normal fast-forward activation and PR automation
+limitation; no repository permission settings were changed.

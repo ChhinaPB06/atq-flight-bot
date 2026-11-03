@@ -1,5 +1,8 @@
 name: Personal YYC–ATQ Flight Watch (health + diagnostics)
 on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/flight-watch.yml]
   schedule:
     - cron: '23 */4 * * *'
   workflow_dispatch:

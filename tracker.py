@@ -587,11 +587,14 @@ def print_coverage(con):
     verified=con.execute("""SELECT COUNT(DISTINCT depart||return_date) FROM live_diagnostics
         WHERE (depart,return_date) IN (SELECT depart,return_date FROM pairs) AND status IN ('eligible_found','all_rejected')""").fetchone()[0]
     accepted=con.execute("SELECT COUNT(*) FROM pairs WHERE live_price IS NOT NULL").fetchone()[0]
+    api_checked=con.execute('SELECT COUNT(*) FROM pairs p JOIN api_pair_checks a USING(depart,return_date)').fetchone()[0]
     print('COVERAGE '+json.dumps({'total_date_pairs':total,'calendar_seen_pairs':calendar,
       'detailed_attempted_pairs':detailed,'detailed_nonempty_pairs':verified,
       'pairs_with_valid_live_fares':accepted,'calendar_pct':round(calendar*100/total,1),
       'detailed_nonempty_pct':round(verified*100/total,1),
       'detailed_attempted_pct':round(detailed*100/total,1),
+      'api_first_pass_attempted':api_checked,
+      'api_first_pass_remaining':total-api_checked,
       'initial_api_batch_limit':18,
       'steady_api_pairs_per_day_limit':2,
       'freshness': 'cumulative coverage, not fresh verification of every pair'}),flush=True)
