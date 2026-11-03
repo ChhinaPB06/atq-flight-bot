@@ -21,7 +21,7 @@ class SerpApiTests(unittest.TestCase):
     def test_specific_return_total_and_whole_duration(self):
         out=flight('YYC','ATQ','2027-01-25',price=1800);out['departure_token']='ephemeral-test-token'
         back=flight('ATQ','YYC','2027-04-16',price=2300)
-        replies=[{'plan_name':'Free','total_searches_left':250},
+        replies=[{'plan_name':'Free Plan','plan_id':'free','plan_monthly_price':0,'total_searches_left':250},
                  {'search_parameters':{'currency':'CAD'},'best_flights':[out]},
                  {'search_parameters':{'currency':'CAD'},'best_flights':[back]}]
         with sqlite3.connect(':memory:') as con:
@@ -41,7 +41,7 @@ class SerpApiTests(unittest.TestCase):
 
     def test_non_cad_response_rejected(self):
         from providers.serpapi import ProviderDataError
-        replies=[{'plan_name':'Free','total_searches_left':250},
+        replies=[{'plan_name':'Free Plan','plan_id':'free','plan_monthly_price':0,'total_searches_left':250},
                  {'search_parameters':{'currency':'USD'},'best_flights':[]}]
         with sqlite3.connect(':memory:') as con:
             with self.assertRaises(ProviderDataError):Client('test-only',lambda p,q:replies.pop(0)).search(con,'2027-01-25','2027-04-16')
@@ -50,7 +50,7 @@ class SerpApiTests(unittest.TestCase):
         out=flight('YYC','ATQ','2027-01-25');out['departure_token']='ephemeral-test-token'
         over=flight('ATQ','YYC','2027-04-16',duration=1900)
         separate=flight('ATQ','YYC','2027-04-16');separate['extensions']=['Separate tickets booked together']
-        replies=[{'plan_name':'Free','total_searches_left':250},
+        replies=[{'plan_name':'Free Plan','plan_id':'free','plan_monthly_price':0,'total_searches_left':250},
                  {'search_parameters':{'currency':'CAD'},'best_flights':[out]},
                  {'search_parameters':{'currency':'CAD'},'best_flights':[over,separate]}]
         with sqlite3.connect(':memory:') as con:

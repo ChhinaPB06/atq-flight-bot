@@ -1,4 +1,4 @@
-name: Inspect Free-plan account metadata
+name: Validate verified zero-dollar Free plan
 on:
   workflow_dispatch:
   push:
