@@ -319,3 +319,14 @@ selectivedetails4433. Explicitly distinguish changed freshness guarantees.
 Implemented local reservation release only for provably unmade second request;
 ambiguous failures keep2.47tests pass. No new key, provider, paid plan, budget
 increase or liveflight query for research. Existing Free monitoring remains.
+
+## E017 — first-principles zero-cost architecture research
+
+User explicitly wants completely free approaches across technology/repos/models/
+cloud/physics. Separate computation from access to fresh fare/inventory state;
+compare native provider notifications plus event-triggered Free verification,
+permitted direct access, free hosting, static route datasets, cached feeds,
+models and constraint pruning. Read first-party help/limits/billing docs; no
+accounts, inbox access, flight calls, subscriptions or provider-block retries.
+Do not use free accounts/trials/cloud/IPs to evade limits. Native alerts cannot
+be called a guaranteed4hfull-grid verification. Preserve running Free monitor.
