@@ -69,3 +69,12 @@ re-inspected logs. Telegram delivery and remote CI have not been demonstrated.
   empty. Draft persistence is confirmed; runtime application/publication is not.
 - Final local checks: 24 tests pass in each provider environment, git diff --check
   passes, no modifications to tracked fare history.
+
+## Agent workflow update
+
+Added AGENTS.md with a bounded research/experiment/evaluate loop, explicit live
+acceptance gates, persistent experiment records and tool-selection rules.
+Research and source revisions are in research/FRAMEWORK_REVIEW.md; next experiment
+and its prerequisites are in research/EXPERIMENTS.md. Telegram is deferred at the
+user's request. No external agent runtime was installed and no claim of improved
+live retrieval follows from the configuration change alone.
