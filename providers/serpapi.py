@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 import json
 import os
+from zoneinfo import ZoneInfo
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
@@ -44,6 +45,12 @@ def journey(item,origin,destination,day):
         raise ProviderDataError('Wrong journey date')
     if item.get('type')!='Round trip' or any(f.get('travel_class')!='Economy' for f in flights):
         raise ProviderDataError('Trip type or cabin is unverified')
+    zones={'YYC':'America/Edmonton','ATQ':'Asia/Kolkata'}
+    start=datetime.fromisoformat(flights[0]['departure_airport']['time']).replace(tzinfo=ZoneInfo(zones[origin]))
+    end=datetime.fromisoformat(flights[-1]['arrival_airport']['time']).replace(tzinfo=ZoneInfo(zones[destination]))
+    elapsed=int((end.astimezone(timezone.utc)-start.astimezone(timezone.utc)).total_seconds()/60)
+    if not 0<elapsed<=1860:raise ProviderDataError('Actual elapsed journey exceeds limit')
+    duration=max(duration,elapsed)  # Conservative if provider and local-time reconstruction differ.
     return duration,[{'airline':f.get('airline'),'number':f.get('flight_number'),
         'from':f['departure_airport']['id'],'to':f['arrival_airport']['id'],
         'depart_at':f['departure_airport']['time'],'arrive_at':f['arrival_airport']['time']} for f in flights]

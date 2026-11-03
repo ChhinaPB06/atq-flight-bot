@@ -1,4 +1,4 @@
-from datetime import datetime,timezone
+from datetime import datetime,timezone,timedelta
 import sqlite3
 import unittest
 from providers.serpapi import Client,reserve,BudgetExhausted,ProviderAccessError
@@ -7,7 +7,7 @@ from providers.serpapi import Client,reserve,BudgetExhausted,ProviderAccessError
 def flight(origin,destination,day,price=2500,duration=1800):
     return {'type':'Round trip','total_duration':duration,'price':price,
         'flights':[{'departure_airport':{'id':origin,'time':day+' 12:00'},
-                    'arrival_airport':{'id':destination,'time':day+' 23:00'},'travel_class':'Economy'}]}
+                    'arrival_airport':{'id':destination,'time':((datetime.fromisoformat(day)+timedelta(days=1)).date().isoformat() if origin=='YYC' else day)+' 23:00'},'travel_class':'Economy'}]}
 
 
 class SerpApiTests(unittest.TestCase):

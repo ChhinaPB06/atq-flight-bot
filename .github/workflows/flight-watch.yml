@@ -58,6 +58,8 @@ jobs:
       - name: Flight watch task
         env:
           TASK: ${{ inputs.task || 'scan' }}
+          FLIGHT_PROVIDER: serpapi
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TRAVELPAYOUTS_TOKEN: ${{ secrets.TRAVELPAYOUTS_TOKEN }}

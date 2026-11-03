@@ -426,12 +426,13 @@ def record_live(con,d,r,offers):
     for x in offers:
         con.execute('''INSERT INTO observations(at_utc,depart,return_date,price_cad,
             outbound_min,inbound_min,source,verification,details) VALUES(?,?,?,?,?,?,?,?,?)''',
-            (now,d,r,x['price_cad'],x['outbound_min'],x['inbound_min'],'fli_live',
+            (now,d,r,x['price_cad'],x['outbound_min'],x['inbound_min'],x.get('source','fli_live'),
              'live_search_not_checkout',json.dumps(x)))
     con.commit()
 
 
 def maybe_alert(con,d,r,offer):
+    if os.getenv('FLIGHT_DISABLE_ALERTS')=='1':return False
     p=offer['price_cad']
     if p>ALERT:return False
     flights=offer['outbound']+offer['return']
@@ -442,7 +443,7 @@ def maybe_alert(con,d,r,offer):
          f"Depart: {d} | Return: {r} | Stay {(date.fromisoformat(r)-date.fromisoformat(d)).days} nights\n"
          f"Travel: outbound {offer['outbound_min']/60:.1f}h, return {offer['inbound_min']/60:.1f}h (max 31h each)\n"
          f"Book/search: {flight_link(d,r)}\n"
-         f"Source: Fli / Google Flights, round-trip search quote, CAD\nObserved (UTC): {utc()}\n"
+         f"Source: {offer.get('source','fli_live')}, round-trip search quote, CAD\nObserved (UTC): {utc()}\n"
          "Verify exact itinerary, checked bags, transit visas and TOTAL FINAL CHECKOUT PRICE before paying.")
     delivered=send_telegram(msg)
     if delivered:
@@ -450,7 +451,37 @@ def maybe_alert(con,d,r,offer):
     return delivered
 
 
+def run_api(con, dry_run=False):
+    from providers.serpapi import Client, BudgetExhausted
+    selected=choose_live(con,1)
+    if dry_run:
+        print('API next pair:',dict(selected[0]) if selected else None)
+        return
+    for row in selected:
+        d,r=row['depart'],row['return_date']
+        try:
+            offers,report=Client().search(con,d,r)
+        except BudgetExhausted:
+            log(con,'quota_deferred','No live search: Free API quota deferred')
+            print('QUOTA DEFERRED: no live verification performed')
+            print_coverage(con)
+            return
+        except Exception as exc:
+            persist_live_diagnostic(con,d,r,{'provider_status':'api_failure','error_type':type(exc).__name__})
+            raise RuntimeError('API scan failed; authenticated details withheld') from None
+        report.update(provider_status='eligible_found' if offers else 'empty_response',
+                      raw_pairs=report.get('return_rows',0),eligible=len(offers),provider='serpapi_google_flights')
+        persist_live_diagnostic(con,d,r,report)
+        record_live(con,d,r,offers)
+        for offer in offers:maybe_alert(con,d,r,offer)
+        print('LIVE DIAGNOSTIC '+json.dumps(report))
+        if not offers:raise RuntimeError('SCAN DEGRADED: no usable API quote, availability unverified')
+    print_coverage(con)
+
+
 def run(con, calendar_per_run=2, live_per_run=2, pause=10, dry_run=False):
+    if os.getenv('FLIGHT_PROVIDER')=='serpapi':
+        return run_api(con,dry_run)
     if date.today()>date(2027,1,31):
         print('Departure period has passed: no more scans.');return
     stays=choose_stays(con,calendar_per_run)

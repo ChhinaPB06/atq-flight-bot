@@ -14,7 +14,7 @@ class NotificationTests(unittest.TestCase):
                 self.assertTrue(t.maybe_alert(con,'2027-01-27','2027-04-15',offer))
                 self.assertFalse(t.maybe_alert(con,'2027-01-27','2027-04-15',offer))
                 self.assertEqual(send.call_count,1)
-                self.assertIn('Source: Fli',send.call_args.args[0])
+                self.assertIn('Source: fli_live',send.call_args.args[0])
                 offer['price_cad']=1700
                 self.assertTrue(t.maybe_alert(con,'2027-01-27','2027-04-15',offer))
             offer['price_cad']=1600

@@ -1,0 +1,44 @@
+name: Validate repeated API scans and history
+on:
+  push:
+    branches: [fix/roundtrip-provider-persistence]
+    paths: [.github/workflows/integrated-api-scan.yml]
+permissions:
+  contents: write
+concurrency:
+  group: personal-flight-watch
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Restore, scan, persist, restore and scan again
+        env:
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+          FLIGHT_DISABLE_ALERTS: '1'
+        run: |
+          evidence="$RUNNER_TEMP/integration-evidence"
+          mkdir -p "$evidence"
+          failed=0
+          for round in 1 2; do
+            round_root="$RUNNER_TEMP/scan-$round"
+            mkdir -p "$round_root"
+            export FLIGHT_DB="$round_root/fares.sqlite3"
+            RUNNER_TEMP="$round_root" python scripts/persist_state.py restore
+            python scripts/audit_api_scan.py "$evidence/scan-$round.json" || failed=1
+            RUNNER_TEMP="$round_root" python scripts/persist_state.py save
+            sleep 10
+          done
+          exit "$failed"
+      - name: Preserve safe integration evidence
+        if: always()
+        run: |
+          if [ -d "$RUNNER_TEMP/integration-evidence" ]; then
+            python scripts/publish_evidence.py "$RUNNER_TEMP/integration-evidence"
+          fi
