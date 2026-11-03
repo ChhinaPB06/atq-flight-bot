@@ -19,14 +19,12 @@ class Text(HTMLParser):
 
 
 sources=[
- 'https://serpapi.com/pricing','https://serpapi.com/google-flights-api',
- 'https://serpapi.com/google-flights-price-calendar-api',
- 'https://www.searchapi.io/pricing','https://www.searchapi.io/docs/google-flights',
- 'https://www.searchapi.io/docs/google-flights-api',
- 'https://hasdata.com/pricing','https://hasdata.com/apis/google-flights-api',
- 'https://www.scrapingdog.com/pricing/','https://www.scrapingdog.com/google-flights-api/',
- 'https://www.flightapi.io/pricing','https://www.flightapi.io/docs/round-trip-flight-api',
- 'https://docs.travelpayouts.com/api-reference/flight-data/overview']
+ 'https://hasdata.com/prices','https://docs.hasdata.com/apis/google-travel/flights',
+ 'https://flightpowers.com/pricing','https://flightpowers.com/docs',
+ 'https://rapidapi.com/mtnrabi/api/google-flights-live-api/pricing',
+ 'https://flightapi.io/pricing','https://docs.flightapi.io/round-trip-flights-api',
+ 'https://www.searchapi.io/pricing','https://www.searchapi.io/docs/google-flights-calendar-api']
+
 def fetch(url):
     report={'url':url}
     try:
@@ -35,13 +33,15 @@ def fetch(url):
         parser=Text();parser.feed(html);text=re.sub(r'\s+',' ',' '.join(parser.parts))
         expressions=['free','credit card','automatically','bill','departure_token',
           'currency','round trip','round-trip','calendar','Google Flights',
-          'credit','requests','searches','\$']
+          'credit','requests','searches',r'\$','overage','USD','CAD','2,500','roundtrip']
         excerpts=[]
         for expression in expressions:
-            for match in list(re.finditer(expression if expression=='\$' else re.escape(expression),text,re.I))[:12]:
+            for match in list(re.finditer(expression if expression==r'\$' else re.escape(expression),text,re.I))[:12]:
                 excerpts.append(text[max(0,match.start()-130):match.end()+370])
         report['excerpts']=list(dict.fromkeys(excerpts))
-    except Exception as exc:report['error_type']=type(exc).__name__
+    except Exception as exc:
+        report['error_type']=type(exc).__name__
+        report['http_error_status']=getattr(exc,'code',None)
     return report
 with ThreadPoolExecutor(max_workers=3) as pool:
     results=list(pool.map(fetch,sources))
