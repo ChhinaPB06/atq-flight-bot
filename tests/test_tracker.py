@@ -15,10 +15,10 @@ class TestTracker(unittest.TestCase):
         self.conn.close();self.tmp.cleanup()
     def test_complete_date_pairs(self):
         ps=t.date_pairs()
-        self.assertEqual(len(ps),216)
-        self.assertEqual(len(set(ps)),216)
-        self.assertTrue(all(60<=(r-d).days<=90 and r<=date(2027,4,30) for d,r in ps))
-        self.assertTrue(any(d.isoformat()=='2027-01-27' and r.isoformat()=='2027-04-15' for d,r in ps))
+        self.assertEqual(len(ps),54)
+        self.assertEqual(len(set(ps)),54)
+        self.assertTrue(all(80<=(r-d).days<=90 and r<=date(2027,4,30) for d,r in ps))
+        self.assertTrue(any(d.isoformat()=='2027-01-27' and r.isoformat()=='2027-04-17' for d,r in ps))
     def test_strict_duration(self):
         self.assertTrue(t.valid_itinerary(1600,1860,1860))
         self.assertFalse(t.valid_itinerary(1400,1861,1400))
@@ -30,17 +30,17 @@ class TestTracker(unittest.TestCase):
             batch=t.choose_stays(self.conn,2)
             stays.extend(batch)
             for s in batch:t.record_discovery(self.conn,s,{})
-        self.assertEqual(set(stays),set(range(60,91)))
-        self.assertEqual(self.conn.execute('SELECT COUNT(*) FROM pairs WHERE last_discovered IS NOT NULL').fetchone()[0],216)
-        self.assertEqual(self.conn.execute("SELECT COUNT(*) FROM pairs WHERE discovery_status='no_quote'").fetchone()[0],216)
+        self.assertEqual(set(stays),set(range(80,91)))
+        self.assertEqual(self.conn.execute('SELECT COUNT(*) FROM pairs WHERE last_discovered IS NOT NULL').fetchone()[0],54)
+        self.assertEqual(self.conn.execute("SELECT COUNT(*) FROM pairs WHERE discovery_status='no_quote'").fetchone()[0],54)
     def test_quote_recording_and_selection(self):
-        key=('2027-01-27','2027-04-15')
-        t.record_discovery(self.conn,78,{key:1550})
+        key=('2027-01-27','2027-04-17')
+        t.record_discovery(self.conn,80,{key:1550})
         self.assertEqual(self.conn.execute('SELECT discovery_price FROM pairs WHERE depart=? AND return_date=?',key).fetchone()[0],1550)
         self.assertTrue(any((x['depart'],x['return_date'])==key for x in t.choose_live(self.conn,3)))
     def test_bootstrap_without_calendar_quotes(self):
         picks=t.choose_live(self.conn,1)
-        self.assertEqual((picks[0]["depart"],picks[0]["return_date"]),("2027-01-27","2027-04-15"))
+        self.assertEqual((picks[0]["depart"],picks[0]["return_date"]),("2027-01-27","2027-04-17"))
     def test_live_filter_unknown_and_overlimit(self):
         class Fake:
             def __init__(self,price,duration):self.price=price;self.duration=duration;self.legs=[]
@@ -48,8 +48,8 @@ class TestTracker(unittest.TestCase):
     def test_alert_never_claims_checkout(self):
         item={'price_cad':1500,'outbound_min':1500,'inbound_min':1550,'outbound':[],'return':[]}
         with patch.object(t,'send_telegram',return_value=True) as send:
-            self.assertTrue(t.maybe_alert(self.conn,'2027-01-27','2027-04-15',item))
-            self.assertFalse(t.maybe_alert(self.conn,'2027-01-27','2027-04-15',item))
+            self.assertTrue(t.maybe_alert(self.conn,'2027-01-27','2027-04-17',item))
+            self.assertFalse(t.maybe_alert(self.conn,'2027-01-27','2027-04-17',item))
             self.assertIn('NOT CHECKOUT VERIFIED',send.call_args.args[0])
 
 if __name__=='__main__':unittest.main()

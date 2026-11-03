@@ -18,7 +18,7 @@ from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parent
 DB = Path(os.getenv('FLIGHT_DB', str(ROOT / 'state' / 'fares.sqlite3')))
-DEP = [date(2027,1,d) for d in (25,26,27,28,29,30,31)]
+DEP = [date(2027,1,d) for d in (27,28,29,30,31)]
 TARGET = 1600
 ALERT = 1900
 MAX_MINS = 31*60
@@ -29,8 +29,8 @@ def utc(): return datetime.now(timezone.utc).isoformat(timespec='seconds')
 
 
 def date_pairs():
-    """All 60-90-night stays, excluding returns after April 30, 2027."""
-    return [(d, d+timedelta(days=n)) for d in DEP for n in range(60,91) if d+timedelta(days=n)<=END]
+    """All 80-90-day stays, excluding returns after April 30, 2027."""
+    return [(d, d+timedelta(days=n)) for d in DEP for n in range(80,91) if d+timedelta(days=n)<=END]
 
 
 def init(path=DB):
@@ -60,6 +60,11 @@ def init(path=DB):
       depart TEXT NOT NULL, return_date TEXT NOT NULL, price_cad INTEGER,
       source TEXT NOT NULL, verification TEXT NOT NULL, details TEXT NOT NULL);
     ''')
+    # Preserve out-of-scope coverage metadata and every historical observation.
+    con.execute('CREATE TABLE IF NOT EXISTS archived_pairs AS SELECT * FROM pairs WHERE 0')
+    inactive = "depart<'2027-01-27' OR depart>'2027-01-31' OR return_date>'2027-04-30' OR julianday(return_date)-julianday(depart) NOT BETWEEN 80 AND 90"
+    con.execute('INSERT INTO archived_pairs SELECT * FROM pairs WHERE '+inactive)
+    con.execute('DELETE FROM pairs WHERE '+inactive)
     con.executemany('INSERT OR IGNORE INTO pairs(depart,return_date) VALUES(?,?)',
                     [(d.isoformat(), r.isoformat()) for d,r in date_pairs()])
     con.commit(); return con
@@ -396,13 +401,13 @@ def record_discovery(con,stay,found):
 
 def choose_stays(con,per_run):
     # Each duration is checked in increasing order of oldest coverage. This eventually
-    # sweeps ALL 60-90 stays, even when calendar results are empty.
+    # sweeps ALL 80-90 stays, even when calendar results are empty.
     result=[]
-    for stay in range(60,91):
+    for stay in range(80,91):
         d=DEP[0];r=d+timedelta(days=stay)
         row=con.execute('SELECT MIN(last_discovered) AS last FROM pairs WHERE return_date=DATE(depart, ?)',
                         (f'+{stay} days',)).fetchone()
-        result.append((row['last'] or '',abs(stay-78),stay))
+        result.append((row['last'] or '',abs(stay-80),stay))
     result.sort();return [i[2] for i in result[:per_run]]
 
 
@@ -565,16 +570,16 @@ def run(con, calendar_per_run=2, live_per_run=2, pause=10, dry_run=False):
 def print_coverage(con):
     total=con.execute('SELECT COUNT(*) FROM pairs').fetchone()[0]
     calendar=con.execute('SELECT COUNT(*) FROM pairs WHERE last_discovered IS NOT NULL').fetchone()[0]
-    detailed=con.execute('SELECT COUNT(DISTINCT depart||return_date) FROM live_diagnostics').fetchone()[0]
+    detailed=con.execute('SELECT COUNT(DISTINCT depart||return_date) FROM live_diagnostics WHERE (depart,return_date) IN (SELECT depart,return_date FROM pairs)').fetchone()[0]
     verified=con.execute("""SELECT COUNT(DISTINCT depart||return_date) FROM live_diagnostics
-        WHERE status IN ('eligible_found','all_rejected')""").fetchone()[0]
+        WHERE (depart,return_date) IN (SELECT depart,return_date FROM pairs) AND status IN ('eligible_found','all_rejected')""").fetchone()[0]
     accepted=con.execute("SELECT COUNT(*) FROM pairs WHERE live_price IS NOT NULL").fetchone()[0]
     print('COVERAGE '+json.dumps({'total_date_pairs':total,'calendar_seen_pairs':calendar,
       'detailed_attempted_pairs':detailed,'detailed_nonempty_pairs':verified,
       'pairs_with_valid_live_fares':accepted,'calendar_pct':round(calendar*100/total,1),
       'detailed_nonempty_pct':round(verified*100/total,1),
       'detailed_attempted_pct':round(detailed*100/total,1),
-      'minimum_first_detailed_cycle_days':round(total/(2*6),1),
+      'minimum_first_detailed_cycle_days':round(total/4,1),
       'freshness': 'cumulative coverage, not fresh verification of every pair'}),flush=True)
 
 

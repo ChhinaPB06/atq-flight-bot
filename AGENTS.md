@@ -8,8 +8,8 @@ is reliable, correctly priced and paired live round-trip retrieval. Telegram is
 explicitly deferred by the user; do not let notification setup block provider work.
 
 Preserve the user's flight constraints: YYC–ATQ return; one adult/economy; Jan
-25–31 2027 departures, Jan 27 preferred; 60–90 nights; return by Apr 30,
-mid-April preferred; all 216 valid pairs; each journey <=1860 minutes including
+27–31 2027 departures, Jan 27 preferred; 80–90 days; return by Apr 30,
+mid-April preferred; all 54 valid pairs; each journey <=1860 minutes including
 layovers; CAD; target <=1600, alert <=1900; record higher fares too. Keep the
 four-hour free-first schedule, historical data and honest cumulative coverage.
 No booking, payments, paid service signup, CAPTCHA/rate-limit bypass or main
@@ -71,7 +71,7 @@ an unobserved sum as a quote. Travelpayouts cache alone does not meet the gate.
 - Live usable YYC–ATQ round-trip retrieval with validated currency, actual dates,
   both <=31h durations, documented price semantics and sanitized evidence.
 - Repeated real scan preserves historical observations without overwrites and
-  reports honest 216-pair coverage and realistic cycle time.
+  reports honest 54-pair coverage and realistic cycle time.
 - Meaningful offline/provider tests and remote CI pass; an actual scheduled or
   manually dispatched scan demonstrates provider and persistence behavior.
 - Telegram delivered once credentials are available (deferred, not passed).

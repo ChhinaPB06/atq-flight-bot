@@ -236,3 +236,14 @@ Added real integration workflow to restore history, scan preferred dates, save,
 restore into a second fresh local DB, scan again and save quota reservations.
 Notifications disabled for this validation. Existing main remains unmodified
 until review/merge. Integration source run 41584121588 is pending.
+
+## E013 — user narrowed scope
+
+Latest explicit range is departures Jan27–31, 80–90 days later, with existing
+Apr30 cutoff retained. This yields54eligiblepairs (Jan31+90days isMay1, excluded).
+Archive out-of-scope pair metadata and preserve all observation history. Filter
+coverage diagnostics to active pairs, so earlier searches do not inflate54pair
+coverage. User wants whole-grid research and four-hour cadence; existing Free
+budget8/day and240/month permits4pairs/day, first54pairpass~13.5days, not a full
+fresh grid every4hours. Trigger two more bounded live scans under the new scope
+and durable quota, with Telegram still disabled for testing.

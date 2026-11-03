@@ -1,4 +1,4 @@
-name: Validate repeated API scans and history
+name: Validate narrowed 54-pair scope and history
 on:
   push:
     branches: [fix/roundtrip-provider-persistence]
