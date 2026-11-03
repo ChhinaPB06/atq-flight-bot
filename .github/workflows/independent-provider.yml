@@ -1,9 +1,6 @@
 name: Observe independent public provider
 on:
   workflow_dispatch:
-  push:
-    branches: [fix/roundtrip-provider-persistence]
-    paths: [.github/workflows/independent-provider.yml, scripts/kiwi_probe.py]
 permissions:
   contents: write
 concurrency:

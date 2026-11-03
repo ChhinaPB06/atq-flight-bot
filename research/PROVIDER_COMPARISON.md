@@ -50,3 +50,11 @@ The runner confirmed no Amadeus or Travelpayouts credentials are configured.
 Independent live-source evaluation now requires authorized account access and
 verification that intended live queries fit a free allowance. No service was
 purchased and no production billing was enabled.
+
+### Amadeus eligibility now verified
+
+Official developer-guides revision 6ecaad720eb122f765a2f205bf948a2a300c9111 confirms
+production billing details/payment setup and automatic charges beyond quota.
+It is **not selected** for autonomous enrollment under current zero-spending
+requirements. See PROVIDER_ELIGIBILITY.md. One ordinary public Kiwi observation
+is the next independent-source experiment; no account, billing or booking.

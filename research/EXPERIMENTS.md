@@ -186,3 +186,13 @@ and schema key/type information, excluding session/booking tokens. This is a new
 provider, not another route around the earlier Google denial. Observation never
 counts as validated fare retrieval; require explicit response currency, complete
 journeys/dates/durations and ticket-type interpretation before accepting data.
+
+E009 actual outcome: source run 41582319498 returned HTTP 403 on the initial
+Kiwi page. Provider blocked; no itinerary parsing occurred. Stop this source,
+remove automatic push trigger and do not try stealth, proxies or alternate
+routes around its denial.
+
+E010: read first-party SerpApi/SearchApi public pricing and Google Flights
+response documentation on the authorized runner. No account, credentials,
+searches, payment or flight API requests. Select only if a hard free allowance
+and required return/currency/duration contract can be verified from those docs.

@@ -1,0 +1,20 @@
+name: Verify public provider access terms
+on:
+  push:
+    branches: [fix/roundtrip-provider-persistence]
+    paths: [.github/workflows/provider-access-research.yml, scripts/provider_access_research.py]
+permissions:
+  contents: write
+concurrency:
+  group: provider-experiment
+  cancel-in-progress: false
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - name: Read first-party terms and response contracts
+        run: python scripts/provider_access_research.py "$RUNNER_TEMP/access-evidence/access.json"
+      - name: Preserve public-source evidence
+        run: python scripts/publish_evidence.py "$RUNNER_TEMP/access-evidence"
