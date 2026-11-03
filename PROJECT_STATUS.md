@@ -166,3 +166,27 @@ before any production scheduling. At 240 searches/month, no more than 120 comple
 pair searches/month are budgeted (~54 days for a first 216-pair pass). Explain
 quota-deferred triggers honestly; four-hour scheduler does not guarantee a live
 query at every trigger or a fresh full-grid scan.
+
+
+## Live retrieval and repeated persistence verified (supersedes missing-key blocker)
+
+User supplied SERPAPI_API_KEY securely. The account's safe metadata is Free Plan,
+plan_id free, zero monthly price, initial250 search balance. Updated account gate
+to stable ID/zero-dollar price after display-name mismatch; no paid calls allowed.
+Initial live source run41583877757 returned3 accepted candidates, lowestCAD2304
+Jan25/Apr16. No checkout verification.
+
+Integrated source run41584121588 completed2 actual tracker scans with history
+restore/save between them. Observations12→13→17; all216pairs persisted; SQLite
+integrityok; durable API reservations2→4. Jan27/Apr11CAD2560, durations1525/1565min.
+Jan27/Apr19 lowestCAD2269, durations1525/1702min. This establishes functional live
+retrieval and repeated durable history in the intended runner, not full-grid
+freshness or checkout totals. No below1900fare was observed or Telegram sent.
+
+Development flight-watch uses the four-hour cron plus Free API source, one pair
+per trigger with persistent240/month and8/day caps. Core scanner now has source-
+specific audit/health/failure classification. Local38tests pass per dependency.
+Main is NOT updated; scheduled deployment requires review/merge. PR creation
+remains externally blocked by Actions PR-creation policy. User can create the
+prepared PR at github.com/ChhinaPB06/atq-flight-bot/pull/new/fix/roundtrip-provider-persistence.
+Telegram remains deferred. Do not call all acceptance criteria complete.

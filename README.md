@@ -205,3 +205,26 @@ budget covers at most 120 paired searches/month, so full-grid rotation can take
 about 54 days. Do not advertise all 216 combinations freshly checked every four
 hours. Amadeus's production billing requirement and Kiwi's access denial are
 recorded in [provider eligibility](research/PROVIDER_ELIGIBILITY.md).
+
+
+### Current verified API operation
+
+With SERPAPI_API_KEY configured, two real integrated scanner runs in Actions
+41584121588 succeeded. History restored between independent local DB instances,
+growing 12→13→17 observations; integrity checks passed; quota reservations
+persisted 2→4. Both kept all 216 pairs. Jan27/Apr11 was CAD2560; lowest new
+Jan27/Apr19 quote was CAD2269 (25h25 outbound,28h22 return). All are observed
+search quotes, not checkout-confirmed totals. No below-CAD1900 deal was found.
+
+The development flight-watch workflow now uses FLIGHT_PROVIDER=serpapi and the
+existing four-hour cron. It makes at most one detailed pair check per trigger,
+subject to the durable daily/monthly caps. Account health checks are explicitly
+account/quota checks, not route availability claims. API duration validation
+uses the greater of returned whole-journey duration and endpoint-timezone elapsed
+time, including layovers, to reject under-reported over-limit journeys.
+
+These changes are on fix/roundtrip-provider-persistence and are not deployed on
+main yet. GitHub disallows Actions-created PRs. Open the prepared development PR,
+review and merge before expecting scheduled main to use this provider. The
+existing main deployment still uses its old provider until then. Telegram was
+explicitly disabled during integration validation and remains deferred.
