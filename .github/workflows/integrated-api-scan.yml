@@ -1,4 +1,4 @@
-name: Validate initial-grid batch scan
+name: Validate remaining 54-pair coverage
 on:
   push:
     branches: [fix/roundtrip-provider-persistence]
@@ -11,18 +11,20 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 7
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - name: Restore, scan, persist, restore and scan again
+      - name: Offline regression checks
+        run: python -m unittest discover -s tests -v
+      - name: Restore history, attempt remaining pairs within Free caps and persist
         env:
           SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
           FLIGHT_DISABLE_ALERTS: '1'
-          API_INITIAL_BATCH: '3'
+          API_INITIAL_BATCH: '18'
         run: |
           evidence="$RUNNER_TEMP/integration-evidence"
           mkdir -p "$evidence"
