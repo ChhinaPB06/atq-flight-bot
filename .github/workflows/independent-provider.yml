@@ -1,0 +1,32 @@
+name: Observe independent public provider
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/roundtrip-provider-persistence]
+    paths: [.github/workflows/independent-provider.yml, scripts/kiwi_probe.py]
+permissions:
+  contents: write
+concurrency:
+  group: provider-experiment
+  cancel-in-progress: false
+jobs:
+  observe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Prepare standard browser
+        run: |
+          python -m pip install 'playwright==1.58.0'
+          python -m playwright install --with-deps chromium
+      - name: Observe one ordinary search
+        run: timeout 100 python scripts/kiwi_probe.py --output "$RUNNER_TEMP/kiwi-evidence/kiwi.json"
+      - name: Preserve sanitized observations
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/kiwi-evidence/kiwi.json" ]; then
+            python scripts/publish_evidence.py "$RUNNER_TEMP/kiwi-evidence"
+          fi

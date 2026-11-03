@@ -170,3 +170,19 @@ health probe before admitting it as live-route evidence; the fixture's 12/7/3
 has no routes, while actual 20/11/15 has JFK-LHR, YYC-ATQ and ATQ-YYC. Regression
 now covers both inline and standalone fixture contamination. Incomplete records
 are conservatively excluded, not promoted to verified route health.
+
+## E009 — independent-source eligibility and one public Kiwi observation
+
+User renewed autonomous authorization. Official Amadeus developer-guides source
+confirms billing details are mandatory for production and over-quota billing is
+automatic (docs/API-Keys/moving-to-production.md). Reject production enrollment
+under current no-spending constraint; do not request user billing details.
+
+Try one ordinary Kiwi public website search, independently authored observation
+code (no proprietary implementation copied), standard Chromium, one exact pair,
+CAD query, 100-second outer limit. Stop on denial/challenge; no retries, login,
+stealth, proxy changes or booking. Save only whitelisted public itinerary fields
+and schema key/type information, excluding session/booking tokens. This is a new
+provider, not another route around the earlier Google denial. Observation never
+counts as validated fare retrieval; require explicit response currency, complete
+journeys/dates/durations and ticket-type interpretation before accepting data.
