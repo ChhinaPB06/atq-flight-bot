@@ -20,6 +20,7 @@ jobs:
       FLI_TIMEOUT: '15'
       # Recover completed experiment evidence without repeating provider traffic.
       RECOVER_RUN_ID: ''
+      EXPERIMENT_CHANNELS: browser
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -41,16 +42,20 @@ jobs:
           "$RUNNER_TEMP/stable/bin/pip" install -r requirements.txt
           python -m venv "$RUNNER_TEMP/upstream"
           "$RUNNER_TEMP/upstream/bin/pip" install 'git+https://github.com/punitarani/fli.git@881aee5ff4321e81ea2157cb44be94ce6a21dc1b'
+          "$RUNNER_TEMP/upstream/bin/pip" install 'playwright==1.58.0'
+          "$RUNNER_TEMP/upstream/bin/python" -m playwright install --with-deps chromium
       - name: Compare one exact round trip
         if: env.RECOVER_RUN_ID == ''
         id: compare
         run: |
           mkdir -p "$RUNNER_TEMP/provider-evidence"
           failed=0
-          for channel in stable upstream; do
-            "$RUNNER_TEMP/$channel/bin/python" -m pip check
-            "$RUNNER_TEMP/$channel/bin/python" -m unittest discover -s tests -v
-            timeout 120 "$RUNNER_TEMP/$channel/bin/python" scripts/provider_experiment.py --channel "$channel" --output "$RUNNER_TEMP/provider-evidence/$channel.json" || failed=1
+          for channel in $EXPERIMENT_CHANNELS; do
+            version="$channel"
+            if [ "$channel" = browser ]; then version=upstream; fi
+            "$RUNNER_TEMP/$version/bin/python" -m pip check
+            "$RUNNER_TEMP/$version/bin/python" -m unittest discover -s tests -v
+            timeout 120 "$RUNNER_TEMP/$version/bin/python" scripts/provider_experiment.py --channel "$channel" --output "$RUNNER_TEMP/provider-evidence/$channel.json" || failed=1
             sleep 10
           done
           exit "$failed"

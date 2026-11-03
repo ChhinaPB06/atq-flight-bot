@@ -110,3 +110,20 @@ normalization and added real-model regression coverage, plus sanitized identity
 fields to future rejection examples. 27 tests pass in each version. Re-run one
 pair/version after this meaningful change; add a live-evidence gate to recovery
 so recovery alone cannot appear to satisfy live success.
+
+### E006 live retest result and E007 browser hypothesis
+
+Source run 41578488968 evidence is published: both stable and upstream returned
+zero initial decoded outbounds on the retest. No new eligible fare yet. This
+shows intermittent raw availability; successful initial retrieval on the earlier
+runner is not a reliability claim. Enum fix is regression-tested, not live-proven.
+
+New hypothesis from FlightScanner source: ordinary rendered Google Flights can
+load results client-side when the HTTP page carries no data. Try standard
+Playwright Chromium, using pinned Fli request construction and decoding. One
+exact pair, top_n=1, serial page fetches, 10-second spacing, 120-second outer
+budget. Observe ordinary page-generated responses; no stealth, replay, proxies,
+CAPTCHA/consent solving, or requests after an access denial. Keep this outside
+production. Only the browser candidate runs in this experiment; do not repeat
+unchanged stable/upstream HTTP queries. Stop if browser is blocked. No claim of
+an independent provider: this remains Google with a different normal client.

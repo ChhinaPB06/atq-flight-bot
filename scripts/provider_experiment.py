@@ -1,5 +1,6 @@
 """One bounded, read-only live provider experiment. Never sends notifications."""
 import argparse
+from contextlib import nullcontext
 import importlib.metadata
 import json
 from pathlib import Path
@@ -17,8 +18,15 @@ def experiment(channel):
             'requested_currency':'CAD','adults':1,'cabin':'economy',
             'top_n':1,'checkout_verified':False,'diagnostic':diagnostic}
     try:
-        offers=tracker.search_round_trip(report['depart'],report['return_date'],
-                                         top_n=1,diagnostic=diagnostic)
+        transport=None
+        if channel=='browser':
+            from browser_transport import BrowserTransport
+            transport=BrowserTransport()
+        with transport.activate() if transport else nullcontext():
+            offers=tracker.search_round_trip(report['depart'],report['return_date'],
+                                             top_n=1,diagnostic=diagnostic)
+        if transport:
+            report['browser_events']=transport.events
         report['eligible_count']=len(offers)
         report['sample_offers']=offers[:3]
         report['outcome']='usable_live_quote' if offers else 'no_usable_quote'
@@ -31,7 +39,7 @@ def experiment(channel):
 
 def main():
     parser=argparse.ArgumentParser()
-    parser.add_argument('--channel',required=True,choices=['stable','upstream'])
+    parser.add_argument('--channel',required=True,choices=['stable','upstream','browser'])
     parser.add_argument('--output',type=Path,required=True)
     args=parser.parse_args()
     report,status=experiment(args.channel)
