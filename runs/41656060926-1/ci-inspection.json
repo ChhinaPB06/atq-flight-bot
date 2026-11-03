@@ -1,0 +1,212 @@
+{
+  "credential_presence": {
+    "AMADEUS_CLIENT_ID": false,
+    "AMADEUS_CLIENT_SECRET": false,
+    "TRAVELPAYOUTS_TOKEN": false
+  },
+  "historical_runs": [
+    {
+      "health": [],
+      "live": [
+        {
+          "depart": null,
+          "eligible": 0,
+          "provider_status": "empty_response",
+          "raw_pairs": 0,
+          "rejected": null,
+          "return_date": null
+        },
+        {
+          "depart": null,
+          "eligible": 1,
+          "provider_status": "eligible_found",
+          "raw_pairs": 4,
+          "rejected": null,
+          "return_date": null
+        },
+        {
+          "depart": null,
+          "eligible": 0,
+          "provider_status": "all_rejected",
+          "raw_pairs": 4,
+          "rejected": null,
+          "return_date": null
+        }
+      ],
+      "log_fetch_exit": 0,
+      "run_id": 41654833453,
+      "test_failures": [
+        {
+          "log_file": "0_offline (stable).txt",
+          "summary": "FAIL: test_persisted_quote_rechecked_and_corruption_detected (test_coverage_report.CoverageReportTests.test_persisted_quote_rechecked_and_corruption_detected)"
+        },
+        {
+          "log_file": "0_offline (stable).txt",
+          "summary": "AssertionError: Lists differ: [{'observation_id': 1, 'error_type': 'Valu[38 chars]te'}] != []"
+        },
+        {
+          "log_file": "0_offline (stable).txt",
+          "summary": "Ran 56 tests in 0.455s"
+        },
+        {
+          "log_file": "0_offline (stable).txt",
+          "summary": "FAILED (failures=1)"
+        },
+        {
+          "log_file": "offline (stable)/5_Run python -m unittest discover -s tests -v.txt",
+          "summary": "FAIL: test_persisted_quote_rechecked_and_corruption_detected (test_coverage_report.CoverageReportTests.test_persisted_quote_rechecked_and_corruption_detected)"
+        },
+        {
+          "log_file": "offline (stable)/5_Run python -m unittest discover -s tests -v.txt",
+          "summary": "AssertionError: Lists differ: [{'observation_id': 1, 'error_type': 'Valu[38 chars]te'}] != []"
+        },
+        {
+          "log_file": "offline (stable)/5_Run python -m unittest discover -s tests -v.txt",
+          "summary": "Ran 56 tests in 0.455s"
+        },
+        {
+          "log_file": "offline (stable)/5_Run python -m unittest discover -s tests -v.txt",
+          "summary": "FAILED (failures=1)"
+        },
+        {
+          "log_file": "1_offline (upstream).txt",
+          "summary": "FAIL: test_persisted_quote_rechecked_and_corruption_detected (test_coverage_report.CoverageReportTests.test_persisted_quote_rechecked_and_corruption_detected)"
+        },
+        {
+          "log_file": "1_offline (upstream).txt",
+          "summary": "AssertionError: Lists differ: [{'observation_id': 1, 'error_type': 'Valu[38 chars]te'}] != []"
+        },
+        {
+          "log_file": "1_offline (upstream).txt",
+          "summary": "Ran 56 tests in 1.143s"
+        },
+        {
+          "log_file": "1_offline (upstream).txt",
+          "summary": "FAILED (failures=1)"
+        },
+        {
+          "log_file": "offline (upstream)/5_Run python -m unittest discover -s tests -v.txt",
+          "summary": "FAIL: test_persisted_quote_rechecked_and_corruption_detected (test_coverage_report.CoverageReportTests.test_persisted_quote_rechecked_and_corruption_detected)"
+        },
+        {
+          "log_file": "offline (upstream)/5_Run python -m unittest discover -s tests -v.txt",
+          "summary": "AssertionError: Lists differ: [{'observation_id': 1, 'error_type': 'Valu[38 chars]te'}] != []"
+        },
+        {
+          "log_file": "offline (upstream)/5_Run python -m unittest discover -s tests -v.txt",
+          "summary": "Ran 56 tests in 1.143s"
+        },
+        {
+          "log_file": "offline (upstream)/5_Run python -m unittest discover -s tests -v.txt",
+          "summary": "FAILED (failures=1)"
+        }
+      ]
+    },
+    {
+      "health": [],
+      "live": [
+        {
+          "depart": null,
+          "eligible": 0,
+          "provider_status": "empty_response",
+          "raw_pairs": 0,
+          "rejected": null,
+          "return_date": null
+        },
+        {
+          "depart": null,
+          "eligible": 1,
+          "provider_status": "eligible_found",
+          "raw_pairs": 4,
+          "rejected": null,
+          "return_date": null
+        },
+        {
+          "depart": null,
+          "eligible": 0,
+          "provider_status": "all_rejected",
+          "raw_pairs": 4,
+          "rejected": null,
+          "return_date": null
+        },
+        {
+          "depart": null,
+          "eligible": 3,
+          "provider_status": "eligible_found",
+          "raw_pairs": 4,
+          "rejected": null,
+          "return_date": null
+        },
+        {
+          "depart": null,
+          "eligible": 1,
+          "provider_status": "eligible_found",
+          "raw_pairs": 1,
+          "rejected": null,
+          "return_date": null
+        },
+        {
+          "depart": null,
+          "eligible": 0,
+          "provider_status": "all_rejected",
+          "raw_pairs": 1,
+          "rejected": null,
+          "return_date": null
+        },
+        {
+          "depart": null,
+          "eligible": 3,
+          "provider_status": "eligible_found",
+          "raw_pairs": 3,
+          "rejected": null,
+          "return_date": null
+        },
+        {
+          "depart": null,
+          "eligible": 5,
+          "provider_status": "eligible_found",
+          "raw_pairs": 7,
+          "rejected": null,
+          "return_date": null
+        },
+        {
+          "depart": null,
+          "eligible": 2,
+          "provider_status": "eligible_found",
+          "raw_pairs": 3,
+          "rejected": null,
+          "return_date": null
+        },
+        {
+          "depart": null,
+          "eligible": 4,
+          "provider_status": "eligible_found",
+          "raw_pairs": 5,
+          "rejected": null,
+          "return_date": null
+        }
+      ],
+      "log_fetch_exit": 0,
+      "run_id": 41654025980,
+      "test_failures": [
+        {
+          "log_file": "0_verify.txt",
+          "summary": "Ran 54 tests in 0.983s"
+        },
+        {
+          "log_file": "verify/5_Offline regression checks.txt",
+          "summary": "Ran 54 tests in 0.983s"
+        }
+      ]
+    }
+  ],
+  "pull_request": {
+    "evidence_run": 41579361074,
+    "outcome": "repository_disallows_actions_pr_creation",
+    "retry_attempted": false
+  },
+  "runner_timezone_offsets": {
+    "2027-01-27T12:00": "-1 day, 18:00:00",
+    "2027-04-20T12:00": "-1 day, 18:00:00"
+  }
+}
