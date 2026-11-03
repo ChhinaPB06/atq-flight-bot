@@ -1,0 +1,196 @@
+{
+  "provider": "serpapi_google_flights",
+  "checkout_verified": false,
+  "outcome": "candidate_quotes_require_live_review",
+  "diagnostic": {
+    "status": "eligible_found",
+    "outbound_rows": 10,
+    "return_rows": 4,
+    "rejected_returns": 1
+  },
+  "sample_offers": [
+    {
+      "price_cad": 2304,
+      "currency": "CAD",
+      "outbound_min": 1810,
+      "inbound_min": 1702,
+      "outbound": [
+        {
+          "airline": "Alaska",
+          "number": "AS 1460",
+          "from": "YYC",
+          "to": "SEA",
+          "depart_at": "2027-01-25 09:00",
+          "arrive_at": "2027-01-25 08:52"
+        },
+        {
+          "airline": "Qatar Airways",
+          "number": "QR 720",
+          "from": "SEA",
+          "to": "DOH",
+          "depart_at": "2027-01-25 15:50",
+          "arrive_at": "2027-01-26 17:25"
+        },
+        {
+          "airline": "Qatar Airways",
+          "number": "QR 548",
+          "from": "DOH",
+          "to": "ATQ",
+          "depart_at": "2027-01-26 20:45",
+          "arrive_at": "2027-01-27 02:40"
+        }
+      ],
+      "return": [
+        {
+          "airline": "Qatar Airways",
+          "number": "QR 549",
+          "from": "ATQ",
+          "to": "DOH",
+          "depart_at": "2027-04-16 03:35",
+          "arrive_at": "2027-04-16 05:15"
+        },
+        {
+          "airline": "Qatar Airways",
+          "number": "QR 719",
+          "from": "DOH",
+          "to": "SEA",
+          "depart_at": "2027-04-16 08:10",
+          "arrive_at": "2027-04-16 12:55"
+        },
+        {
+          "airline": "Alaska",
+          "number": "AS 1572",
+          "from": "SEA",
+          "to": "YYC",
+          "depart_at": "2027-04-16 17:57",
+          "arrive_at": "2027-04-16 20:27"
+        }
+      ],
+      "source": "serpapi_google_flights",
+      "ticket_type": "provider_round_trip_quote",
+      "verification": "api_search_not_checkout"
+    },
+    {
+      "price_cad": 2439,
+      "currency": "CAD",
+      "outbound_min": 1810,
+      "inbound_min": 1832,
+      "outbound": [
+        {
+          "airline": "Alaska",
+          "number": "AS 1460",
+          "from": "YYC",
+          "to": "SEA",
+          "depart_at": "2027-01-25 09:00",
+          "arrive_at": "2027-01-25 08:52"
+        },
+        {
+          "airline": "Qatar Airways",
+          "number": "QR 720",
+          "from": "SEA",
+          "to": "DOH",
+          "depart_at": "2027-01-25 15:50",
+          "arrive_at": "2027-01-26 17:25"
+        },
+        {
+          "airline": "Qatar Airways",
+          "number": "QR 548",
+          "from": "DOH",
+          "to": "ATQ",
+          "depart_at": "2027-01-26 20:45",
+          "arrive_at": "2027-01-27 02:40"
+        }
+      ],
+      "return": [
+        {
+          "airline": "Qatar Airways",
+          "number": "QR 549",
+          "from": "ATQ",
+          "to": "DOH",
+          "depart_at": "2027-04-16 03:35",
+          "arrive_at": "2027-04-16 05:15"
+        },
+        {
+          "airline": "Qatar Airways",
+          "number": "QR 763",
+          "from": "DOH",
+          "to": "YUL",
+          "depart_at": "2027-04-16 08:30",
+          "arrive_at": "2027-04-16 14:45"
+        },
+        {
+          "airline": "Porter Airlines",
+          "number": "PD 389",
+          "from": "YUL",
+          "to": "YYC",
+          "depart_at": "2027-04-16 19:45",
+          "arrive_at": "2027-04-16 22:37"
+        }
+      ],
+      "source": "serpapi_google_flights",
+      "ticket_type": "provider_round_trip_quote",
+      "verification": "api_search_not_checkout"
+    },
+    {
+      "price_cad": 3234,
+      "currency": "CAD",
+      "outbound_min": 1810,
+      "inbound_min": 1565,
+      "outbound": [
+        {
+          "airline": "Alaska",
+          "number": "AS 1460",
+          "from": "YYC",
+          "to": "SEA",
+          "depart_at": "2027-01-25 09:00",
+          "arrive_at": "2027-01-25 08:52"
+        },
+        {
+          "airline": "Qatar Airways",
+          "number": "QR 720",
+          "from": "SEA",
+          "to": "DOH",
+          "depart_at": "2027-01-25 15:50",
+          "arrive_at": "2027-01-26 17:25"
+        },
+        {
+          "airline": "Qatar Airways",
+          "number": "QR 548",
+          "from": "DOH",
+          "to": "ATQ",
+          "depart_at": "2027-01-26 20:45",
+          "arrive_at": "2027-01-27 02:40"
+        }
+      ],
+      "return": [
+        {
+          "airline": "Qatar Airways",
+          "number": "QR 549",
+          "from": "ATQ",
+          "to": "DOH",
+          "depart_at": "2027-04-16 03:35",
+          "arrive_at": "2027-04-16 05:15"
+        },
+        {
+          "airline": "Qatar Airways",
+          "number": "QR 719",
+          "from": "DOH",
+          "to": "SEA",
+          "depart_at": "2027-04-16 08:10",
+          "arrive_at": "2027-04-16 12:55"
+        },
+        {
+          "airline": "WestJet",
+          "number": "WS 1553",
+          "from": "SEA",
+          "to": "YYC",
+          "depart_at": "2027-04-16 15:30",
+          "arrive_at": "2027-04-16 18:10"
+        }
+      ],
+      "source": "serpapi_google_flights",
+      "ticket_type": "provider_round_trip_quote",
+      "verification": "api_search_not_checkout"
+    }
+  ]
+}
