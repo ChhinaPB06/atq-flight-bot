@@ -88,3 +88,24 @@ checks against real Fli expansion logic; 26 offline tests pass per version.
 Added a bounded GitHub runner experiment that can return sanitized JSON through
 a dedicated evidence branch; this is pending execution, not proof of live fares.
 Telegram remains deferred. Continue from E005 in research/EXPERIMENTS.md.
+
+## Current live evidence (supersedes earlier access-only blocker)
+
+GitHub HTML run pages and Git-hosted evidence provide a working observation path
+although this machine's API access remains denied. Actual comparison source run
+41578099055 returned 8 stable initial outbounds and 3 pairs, but new validation
+rejected them due to an airport-enum normalization defect (.value contains the
+full airport name; .name is the IATA code). That defect is now fixed and tested
+with real Fli model instances. Original evidence did not retain enough identity
+fields to retrospectively declare those fares validated.
+
+Retest 41578488968 returned zero initial outbounds from both stable and upstream;
+no usable validated live quote yet. A standard Playwright rendered-page experiment
+is now testing the client-side-data hypothesis. First browser attempt failed in
+setup, not at the provider. Supported Ubuntu 24.04 retry is run 41578961275.
+Offline CI 41578961308 passed; 29 tests now pass locally under each Fli version,
+including guards that stop browser experiments on HTTP denial or consent pages.
+
+Draft PR automation run 41578624276 failed; no PR exists. The reason is not
+established by its generic HTML annotation, and account settings were not changed.
+The scheduled main deployment is unchanged. Do not claim project completion.
