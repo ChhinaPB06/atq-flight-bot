@@ -1,0 +1,67 @@
+{
+  "source": "serpapi_google_flights",
+  "checkout_verified": false,
+  "observations_before": 25,
+  "status": "scan_completed",
+  "observations_after": 35,
+  "date_pairs": 54,
+  "api_reserved_searches": 14,
+  "integrity": "ok",
+  "latest_diagnostic": {
+    "id": 11,
+    "at_utc": "2026-11-03T06:19:33+00:00",
+    "depart": "2027-01-27",
+    "return_date": "2027-04-22",
+    "status": "eligible_found",
+    "raw_pairs": 3,
+    "eligible": 3,
+    "detail": "{\"eligible\": 3, \"outbound_rows\": 7, \"provider\": \"serpapi_google_flights\", \"provider_status\": \"eligible_found\", \"raw_pairs\": 3, \"rejected_returns\": 0, \"return_rows\": 3, \"status\": \"eligible_found\"}"
+  },
+  "recent_api_prices": [
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-22",
+      "price_cad": 2548,
+      "outbound_min": 1525,
+      "inbound_min": 1832,
+      "source": "serpapi_google_flights",
+      "verification": "live_search_not_checkout"
+    },
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-22",
+      "price_cad": 2548,
+      "outbound_min": 1525,
+      "inbound_min": 1690,
+      "source": "serpapi_google_flights",
+      "verification": "live_search_not_checkout"
+    },
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-22",
+      "price_cad": 2439,
+      "outbound_min": 1525,
+      "inbound_min": 1702,
+      "source": "serpapi_google_flights",
+      "verification": "live_search_not_checkout"
+    },
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-18",
+      "price_cad": 2560,
+      "outbound_min": 1780,
+      "inbound_min": 1565,
+      "source": "serpapi_google_flights",
+      "verification": "live_search_not_checkout"
+    },
+    {
+      "depart": "2027-01-27",
+      "return_date": "2027-04-18",
+      "price_cad": 2326,
+      "outbound_min": 1780,
+      "inbound_min": 1702,
+      "source": "serpapi_google_flights",
+      "verification": "live_search_not_checkout"
+    }
+  ]
+}
