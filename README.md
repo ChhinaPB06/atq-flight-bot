@@ -129,8 +129,8 @@ records only the user's reported checkout observation, never an independent chec
   active first-pass coverage6/54 before the main sweep.
 - Best observed at that checkpoint: **CAD2245,Jan27–Apr20**,83days,
   **25h25m outbound /28h10m return**, search quote only. New scans may change it.
-- **58offline tests** and actionlint pass on the development branch. Tests alone
-  are not live fare proof; check the linked run evidence for remote validation.
+- **58offline tests** pass under stable and upstream in remoteCI41656960169;
+  actionlint passes. Tests alone are not live fare proof.
 
 Inspect Actions summaries, LIVE DIAGNOSTIC, COVERAGE, saved history and the
 flight-provider-evidence branch. Run `python tracker.py status` against a restored
@@ -143,7 +143,7 @@ No force push or account-permission change occurred.
 
 ## Reproduce the complete coverage audit
 
-The development branch includes a read-only report of every active date pair:
+Use the read-only report of every active date pair:
 
 ```sh
 python scripts/coverage_report.py --db /path/to/restored/fares.sqlite3 --csv /path/to/54-pair-results.csv > /path/to/coverage-audit.json
@@ -157,8 +157,8 @@ does not modify the database or spend credits. A successful audit validates stor
 facts; it does not mean every pair has a quote, all prices are fresh, Telegram
 worked, or checkout was confirmed.
 
-The native email pilot is also on the development branch, separately from the
-deployed API scanner. Its tests use synthetic messages. Actual Google alert
+The native email pilot is a manual prototype, separate from the scheduled
+API scanner. Its tests use synthetic messages. Actual Google alert
 ingestion and all 54 native watches have not been demonstrated. Follow
 [the pilot setup](research/NATIVE_ALERT_PILOT.md) for the required real sample;
 no mailbox connector or recurring inbox ingestion is currently configured.

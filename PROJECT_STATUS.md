@@ -10,13 +10,13 @@ SQLite integrityok;112reserved searches total. Per-pair CSV/audit are generated
 with scripts/coverage_report.py, which performs no network request or DB mutation.
 25pairs had a quote within4hours at14:37UTC; cumulative attempts are not freshness.
 
-Remote58test validation is being run after a reproduced timezone portability
+Remote58test validation passed in41656960169 after a reproduced timezone portability
 defect: host Calgary January2027offset differed between cloud/Ubuntu images.
 Scanner/audit now explicitly use tzdata2026.6/IANA2026f. All134active-pair stored
 quotes pass the current-rule audit, so best remainsCAD2074 Jan29/Apr21,
 1810/1702minutes, observed06:31:27UTC. Not checkout-confirmed; no<=1900quote.
 58local tests pass per Fli version, including a case that older rules would
-wrongly admit as<=31hours. Remote CI result must be observed before calling it passed.
+wrongly admit as<=31hours. Remote stable/upstream CI passed with the corrected rules.
 
 Native Google email ingestion remains untested against a real exported alert;
 no inbox integration or54enabled watches has been demonstrated. Telegram is
