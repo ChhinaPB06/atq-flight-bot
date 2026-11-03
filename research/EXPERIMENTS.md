@@ -216,3 +216,23 @@ suites each have 36 passing tests; actionlint passes. Optional integration and
 hard local budget are reviewable; live gate remains blocked on a Free account
 key. Precise next experiment is the same prepared probe after a meaningful
 credential-state change. Do not repeat missing-key runs or enroll a paid plan.
+
+## E012 — credential supplied and first maintained-API live success
+
+User confirmed SERPAPI_API_KEY saved in GitHub. Account probe 41583800087 returned
+safe metadata: plan_name Free Plan, plan_id free, 250 searches remaining. Initial
+exact display-name check refused before flight requests; corrected to stable
+plan_id plus explicit zero-dollar plan_monthly_price. No key/account identity
+values were exported. Probe 41583877757 retrieved 10 outbound and 4 return rows;
+3 candidate quotes passed checks, lowest CAD2304, provider total durations 1810
+outbound /1702 inbound minutes, Jan25–Apr16. One return was rejected. No checkout
+confirmation or below-threshold deal is claimed.
+
+Integrated optional source into tracker scan, retaining source/verification in
+history. Conservative duration check also computes endpoint-local-time elapsed
+using YYC/ATQ timezones and takes the greater of provider total and reconstructed
+elapsed; rejects either over31h. This avoids flying-time-only layover omissions.
+Added real integration workflow to restore history, scan preferred dates, save,
+restore into a second fresh local DB, scan again and save quota reservations.
+Notifications disabled for this validation. Existing main remains unmodified
+until review/merge. Integration source run 41584121588 is pending.

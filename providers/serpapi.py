@@ -5,10 +5,12 @@ import os
 from zoneinfo import ZoneInfo
 from urllib.parse import urlencode
 from urllib.request import urlopen
+from urllib.error import HTTPError
 
 
 class ProviderAccessError(RuntimeError):pass
 class BudgetExhausted(RuntimeError):pass
+class ProviderRateLimit(ProviderAccessError):pass
 class ProviderDataError(RuntimeError):pass
 
 
@@ -67,10 +69,13 @@ class Client:
         url='https://serpapi.com/'+path+'?'+urlencode({**params,'api_key':self.key})
         try:
             with urlopen(url,timeout=30) as response:return json.load(response)
+        except HTTPError as exc:
+            if exc.code==429:raise ProviderRateLimit('Provider quota or rate limit reached') from None
+            raise ProviderAccessError('Provider HTTP access failed') from None
         except Exception:
             raise ProviderAccessError('Provider request failed; credentials and URLs withheld') from None
 
-    def search(self,con,depart,return_date):
+    def check_access(self):
         account=self.request('account.json',{})
         self.account_metadata={k:account.get(k) for k in ('plan_name','plan_id','plan_monthly_price','searches_per_month','total_searches_left')}
         self.account_metadata['field_names']=sorted(account)
@@ -79,6 +84,10 @@ class Client:
         remaining=account.get('total_searches_left')
         if isinstance(remaining,bool) or not isinstance(remaining,int) or remaining<2:
             raise BudgetExhausted('Provider free allowance unavailable')
+        return remaining
+
+    def search(self,con,depart,return_date):
+        self.check_access()
         reserve(con)
         params={'engine':'google_flights','departure_id':'YYC','arrival_id':'ATQ',
                 'outbound_date':depart,'return_date':return_date,'currency':'CAD',

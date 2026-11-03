@@ -279,6 +279,7 @@ def search_round_trip(d, r, top_n=5, diagnostic=None):
 def classify_failure(exc):
     name = type(exc).__name__.lower()
     code = getattr(exc, 'status_code', None)
+    if 'ratelimit' in name:return 'provider_rate_limited'
     if code == 429 or (getattr(exc,'code',None)==8 and 'rejected' in name): return 'provider_rate_limited'
     if code in (401,403) or 'blocked' in name: return 'provider_blocked'
     if 'rejected' in name: return 'provider_rejected'
@@ -467,23 +468,26 @@ def run_api(con, dry_run=False):
             print_coverage(con)
             return
         except Exception as exc:
-            persist_live_diagnostic(con,d,r,{'provider_status':'api_failure','error_type':type(exc).__name__})
+            persist_live_diagnostic(con,d,r,{'provider_status':classify_failure(exc),'error_type':type(exc).__name__})
+            con.execute('UPDATE pairs SET last_live=?,live_status=? WHERE depart=? AND return_date=?',(utc(),'api_failure',d,r))
+            con.commit()
             raise RuntimeError('API scan failed; authenticated details withheld') from None
-        report.update(provider_status='eligible_found' if offers else 'empty_response',
+        report.update(provider_status=('eligible_found' if offers else 'all_rejected' if report.get('return_rows') else 'empty_response'),
                       raw_pairs=report.get('return_rows',0),eligible=len(offers),provider='serpapi_google_flights')
         persist_live_diagnostic(con,d,r,report)
         record_live(con,d,r,offers)
         for offer in offers:maybe_alert(con,d,r,offer)
         print('LIVE DIAGNOSTIC '+json.dumps(report))
+        log(con,'api_scan_complete',json.dumps({'depart':d,'return_date':r,**report}))
         if not offers:raise RuntimeError('SCAN DEGRADED: no usable API quote, availability unverified')
     print_coverage(con)
 
 
 def run(con, calendar_per_run=2, live_per_run=2, pause=10, dry_run=False):
-    if os.getenv('FLIGHT_PROVIDER')=='serpapi':
-        return run_api(con,dry_run)
     if date.today()>date(2027,1,31):
         print('Departure period has passed: no more scans.');return
+    if os.getenv('FLIGHT_PROVIDER')=='serpapi':
+        return run_api(con,dry_run)
     stays=choose_stays(con,calendar_per_run)
     print('Calendar stay-length batches:',stays,flush=True)
     if dry_run:return
@@ -616,6 +620,11 @@ def main():
             for d,r in date_pairs():print(d,r)
         elif args.command=='confirm':confirm(con,args.depart,args.return_date,args.price,args.seller_url)
         elif args.command=='health':
+            if os.getenv('FLIGHT_PROVIDER')=='serpapi':
+                from providers.serpapi import Client
+                remaining=Client().check_access()
+                print('API ACCOUNT HEALTH: Free account accessible; remaining searches',remaining,'; route availability not tested')
+                return
             result=run_provider_health(con)
             if result['status'] in ('provider_error','provider_unhealthy_or_blocked'):
                 raise SystemExit('Provider health check FAILED; empty control does not imply no flights')
