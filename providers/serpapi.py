@@ -14,7 +14,7 @@ class ProviderRateLimit(ProviderAccessError):pass
 class ProviderDataError(RuntimeError):pass
 
 
-def reserve(con,now=None):
+def reserve(con,now=None,daily_limit=8):
     """Reserve two searches atomically; do not refund potentially billed failures."""
     stamp=(now or datetime.now(timezone.utc)).astimezone(timezone.utc).isoformat()
     con.execute('CREATE TABLE IF NOT EXISTS serpapi_usage (at_utc TEXT NOT NULL, searches INTEGER NOT NULL)')
@@ -23,7 +23,8 @@ def reserve(con,now=None):
     try:
         month=con.execute('SELECT COALESCE(SUM(searches),0) FROM serpapi_usage WHERE substr(at_utc,1,7)=?',(stamp[:7],)).fetchone()[0]
         day=con.execute('SELECT COALESCE(SUM(searches),0) FROM serpapi_usage WHERE substr(at_utc,1,10)=?',(stamp[:10],)).fetchone()[0]
-        if month+2>240 or day+2>8:raise BudgetExhausted('Free search budget deferred')
+        hour=con.execute("SELECT COALESCE(SUM(searches),0) FROM serpapi_usage WHERE julianday(at_utc)>julianday(?,'-1 hour')",(stamp,)).fetchone()[0]
+        if month+2>240 or day+2>daily_limit or hour+2>40:raise BudgetExhausted('Free search budget deferred')
         con.execute('INSERT INTO serpapi_usage VALUES (?,2)',(stamp,));con.commit()
     except Exception:
         con.rollback();raise
@@ -86,9 +87,9 @@ class Client:
             raise BudgetExhausted('Provider free allowance unavailable')
         return remaining
 
-    def search(self,con,depart,return_date):
+    def search(self,con,depart,return_date,daily_limit=8):
         self.check_access()
-        reserve(con)
+        reserve(con,daily_limit=daily_limit)
         params={'engine':'google_flights','departure_id':'YYC','arrival_id':'ATQ',
                 'outbound_date':depart,'return_date':return_date,'currency':'CAD',
                 'adults':1,'travel_class':1,'type':1,'hl':'en','gl':'ca'}

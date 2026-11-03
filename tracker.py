@@ -60,6 +60,8 @@ def init(path=DB):
       depart TEXT NOT NULL, return_date TEXT NOT NULL, price_cad INTEGER,
       source TEXT NOT NULL, verification TEXT NOT NULL, details TEXT NOT NULL);
     ''')
+    con.execute('CREATE TABLE IF NOT EXISTS api_pair_checks (depart TEXT,return_date TEXT,checked_at TEXT,PRIMARY KEY(depart,return_date))')
+    con.execute("INSERT OR IGNORE INTO api_pair_checks SELECT depart,return_date,MIN(at_utc) FROM observations WHERE source='serpapi_google_flights' GROUP BY depart,return_date")
     # Preserve out-of-scope coverage metadata and every historical observation.
     con.execute('CREATE TABLE IF NOT EXISTS archived_pairs AS SELECT * FROM pairs WHERE 0')
     inactive = "depart<'2027-01-27' OR depart>'2027-01-31' OR return_date>'2027-04-30' OR julianday(return_date)-julianday(depart) NOT BETWEEN 80 AND 90"
@@ -459,18 +461,26 @@ def maybe_alert(con,d,r,offer):
 
 def run_api(con, dry_run=False):
     from providers.serpapi import Client, BudgetExhausted
-    selected=choose_live(con,1)
+    batch=max(1,min(int(os.getenv('API_INITIAL_BATCH','1')),18))
+    selected=con.execute('''SELECT p.* FROM pairs p WHERE NOT EXISTS
+        (SELECT 1 FROM api_pair_checks a WHERE a.depart=p.depart AND a.return_date=p.return_date)
+        ORDER BY CASE WHEN p.depart='2027-01-27' THEN 0 ELSE 1 END,
+        ABS(julianday(p.return_date)-julianday('2027-04-15')),p.depart,p.return_date LIMIT ?''',(batch,)).fetchall()
+    initial=bool(selected)
+    if not initial:selected=choose_live(con,1)
+    errors=[]
     if dry_run:
         print('API next pair:',dict(selected[0]) if selected else None)
         return
     for row in selected:
         d,r=row['depart'],row['return_date']
         try:
-            offers,report=Client().search(con,d,r)
+            offers,report=Client().search(con,d,r,daily_limit=120 if initial else 4)
         except BudgetExhausted:
             log(con,'quota_deferred','No live search: Free API quota deferred')
             print('QUOTA DEFERRED: no live verification performed')
             print_coverage(con)
+            if errors:raise RuntimeError('SCAN DEGRADED: '+'; '.join(errors))
             return
         except Exception as exc:
             persist_live_diagnostic(con,d,r,{'provider_status':classify_failure(exc),'error_type':type(exc).__name__})
@@ -481,11 +491,14 @@ def run_api(con, dry_run=False):
                       raw_pairs=report.get('return_rows',0),eligible=len(offers),provider='serpapi_google_flights')
         persist_live_diagnostic(con,d,r,report)
         record_live(con,d,r,offers)
+        con.execute('INSERT OR REPLACE INTO api_pair_checks VALUES (?,?,?)',(d,r,utc()));con.commit()
         for offer in offers:maybe_alert(con,d,r,offer)
         print('LIVE DIAGNOSTIC '+json.dumps(report))
         log(con,'api_scan_complete',json.dumps({'depart':d,'return_date':r,**report}))
-        if not offers:raise RuntimeError('SCAN DEGRADED: no usable API quote, availability unverified')
+        if not offers:errors.append(f'{d}/{r}: no usable API quote; availability unverified')
+        if len(selected)>1:time.sleep(10)
     print_coverage(con)
+    if errors:raise RuntimeError('SCAN DEGRADED: '+'; '.join(errors))
 
 
 def run(con, calendar_per_run=2, live_per_run=2, pause=10, dry_run=False):
@@ -579,7 +592,8 @@ def print_coverage(con):
       'pairs_with_valid_live_fares':accepted,'calendar_pct':round(calendar*100/total,1),
       'detailed_nonempty_pct':round(verified*100/total,1),
       'detailed_attempted_pct':round(detailed*100/total,1),
-      'minimum_first_detailed_cycle_days':round(total/4,1),
+      'initial_api_batch_limit':18,
+      'steady_api_pairs_per_day_limit':2,
       'freshness': 'cumulative coverage, not fresh verification of every pair'}),flush=True)
 
 

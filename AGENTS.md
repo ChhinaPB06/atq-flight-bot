@@ -97,3 +97,5 @@ Activate /workspace/venvs/atq-flight-bot for stable or
 /workspace/venvs/atq-flight-bot-upstream for pinned upstream when present; otherwise
 follow README setup. Agent instructions guide future turns when this checkout is
 loaded; they do not create an unattended background agent or change system tools.
+
+Current API policy: initial54pairpass uses at most18pairs/trigger,40searches/rollinghour,120/day and240/month. After first-pass attempts complete, dailycap4searches allows2pairs/day. Provider Free-plan/zero-price/remaining-quota gates remain mandatory. Preserve quota and api_pair_checks in persisted fare DB. Initial batches must not be described as a fresh full grid every4hours.

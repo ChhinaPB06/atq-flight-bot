@@ -57,3 +57,16 @@ class SerpApiTests(unittest.TestCase):
             offers,report=Client('test-only',lambda p,q:replies.pop(0)).search(con,'2027-01-25','2027-04-16')
         self.assertEqual(offers,[])
         self.assertEqual(report['rejected_returns'],2)
+
+    def test_initial_batch_keeps_rolling_hour_cap(self):
+        now=datetime(2026,11,3,tzinfo=timezone.utc)
+        with sqlite3.connect(':memory:') as con:
+            for _ in range(20):reserve(con,now,daily_limit=120)
+            with self.assertRaises(BudgetExhausted):reserve(con,now,daily_limit=120)
+            self.assertEqual(con.execute('SELECT SUM(searches) FROM serpapi_usage').fetchone()[0],40)
+
+    def test_steady_budget_limits_two_pairs_daily(self):
+        now=datetime(2026,11,3,tzinfo=timezone.utc)
+        with sqlite3.connect(':memory:') as con:
+            reserve(con,now,daily_limit=4);reserve(con,now,daily_limit=4)
+            with self.assertRaises(BudgetExhausted):reserve(con,now,daily_limit=4)

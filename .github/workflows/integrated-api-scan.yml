@@ -1,4 +1,4 @@
-name: Validate narrowed 54-pair scope and history
+name: Validate initial-grid batch scan
 on:
   push:
     branches: [fix/roundtrip-provider-persistence]
@@ -22,11 +22,12 @@ jobs:
         env:
           SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
           FLIGHT_DISABLE_ALERTS: '1'
+          API_INITIAL_BATCH: '3'
         run: |
           evidence="$RUNNER_TEMP/integration-evidence"
           mkdir -p "$evidence"
           failed=0
-          for round in 1 2; do
+          for round in 1; do
             round_root="$RUNNER_TEMP/scan-$round"
             mkdir -p "$round_root"
             export FLIGHT_DB="$round_root/fares.sqlite3"
