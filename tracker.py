@@ -279,8 +279,9 @@ def search_round_trip(d, r, top_n=5, diagnostic=None):
 def classify_failure(exc):
     name = type(exc).__name__.lower()
     code = getattr(exc, 'status_code', None)
-    if code == 429: return 'provider_rate_limited'
-    if code in (401,403): return 'provider_blocked'
+    if code == 429 or (getattr(exc,'code',None)==8 and 'rejected' in name): return 'provider_rate_limited'
+    if code in (401,403) or 'blocked' in name: return 'provider_blocked'
+    if 'rejected' in name: return 'provider_rejected'
     if 'parse' in name or isinstance(exc, (ValueError, TypeError, KeyError)):
         return 'parser_error'
     if 'timeout' in name: return 'provider_timeout'

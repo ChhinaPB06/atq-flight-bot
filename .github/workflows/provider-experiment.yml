@@ -1,11 +1,6 @@
 name: Bounded live provider comparison
 on:
   workflow_dispatch:
-  push:
-    branches: [fix/roundtrip-provider-persistence]
-    paths:
-      - .github/workflows/provider-experiment.yml
-      - scripts/provider_experiment.py
 permissions:
   contents: write
   actions: read
