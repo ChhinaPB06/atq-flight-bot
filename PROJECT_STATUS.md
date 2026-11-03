@@ -24,6 +24,14 @@ deferred. Free quota cannot support fresh detailed54pairchecks every4hours.
 No real PR exists because repository Actions PR creation is disabled.
 The complete project therefore is not fully ready or acceptance-complete.
 
+Deployment:normal fast-forward main9d0649b→c58a69e applied the validated timezone
+fix and audit tooling. Production workflow41657335604 and mainCI41657334969 both
+passed; developmentCI41657287852 also passed. No force push, account setting
+change or alert enablement occurred. A green post-deployment run does not mean
+all54pairs were searched again; the already completed first pass and normal
+rotation/free limits still govern which queries can run. Initial live batch
+41654025980 remains correctly degraded for its unusable responses.
+
 ## Acceptance status
 
 Engineering work is **in progress, externally blocked**, not complete. No new live
