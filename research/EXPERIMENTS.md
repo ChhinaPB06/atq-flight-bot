@@ -279,3 +279,14 @@ CAD2074 Jan29/Apr21 (1810/1702min); preferredJan27CAD2233Apr23. Explicitly label
 empty pairmetadata provider_empty_unverified, including persisted legacy metadata
 whose latest diagnostic is empty. Scheduler stays active; no duplicate queries
 for documentation changes. All54are tracked, not claimed freshly researched.
+
+## E015 — cheaper full-frequency coverage research
+
+User asks for cheaper all-pair searches. Workload is54pairs×6/day×30days=9720
+complete-pair searches/month. A two-stage provider needs up to19440APIrequests
+(20088in31days), before retries. Research official pricing, endpoint-specific
+credit costs, one-versus-two-call pairing, currencies/durations and calendar/cache
+limitations. Public documentation only; no signup, paid request, key sharing or
+subscription changes. Candidate comparison includes SerpApi, SearchApi, HasData,
+Scrapingdog, FlightAPI and Travelpayouts. Public-source fetching is parallel and
+bounded; it does not consume flight-search credits or alter the active monitor.
