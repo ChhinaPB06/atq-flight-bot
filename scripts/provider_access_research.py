@@ -19,11 +19,10 @@ class Text(HTMLParser):
 
 
 sources=[
- 'https://hasdata.com/prices','https://docs.hasdata.com/apis/google-travel/flights',
- 'https://flightpowers.com/pricing','https://flightpowers.com/docs',
- 'https://rapidapi.com/mtnrabi/api/google-flights-live-api/pricing',
- 'https://flightapi.io/pricing','https://docs.flightapi.io/round-trip-flights-api',
- 'https://www.searchapi.io/pricing','https://www.searchapi.io/docs/google-flights-calendar-api']
+ 'https://serpapi.com/google-flights-api',
+ 'https://www.searchapi.io/docs/google-flights-calendar-api',
+ 'https://www.searchapi.io/docs/google-flights-api',
+ 'https://flightpowers.com/docs']
 
 def fetch(url):
     report={'url':url}
@@ -33,12 +32,16 @@ def fetch(url):
         parser=Text();parser.feed(html);text=re.sub(r'\s+',' ',' '.join(parser.parts))
         expressions=['free','credit card','automatically','bill','departure_token',
           'currency','round trip','round-trip','calendar','Google Flights',
-          'credit','requests','searches',r'\$','overage','USD','CAD','2,500','roundtrip']
+          'selected_flights_json','selected flights','cache expires','cached searches','200 unique',
+          'max_duration','total_duration','price_calendar','outbound_date_start','return_date_start',
+          'flights_days','price','departure_token','duration']
         excerpts=[]
         for expression in expressions:
             for match in list(re.finditer(expression if expression==r'\$' else re.escape(expression),text,re.I))[:12]:
                 excerpts.append(text[max(0,match.start()-130):match.end()+370])
         report['excerpts']=list(dict.fromkeys(excerpts))
+        if 'calendar-api' in url:
+            report['response_examples']=[text[max(0,m.start()-100):m.end()+1300] for m in list(re.finditer('JSON Example',text))[:3]]
     except Exception as exc:
         report['error_type']=type(exc).__name__
         report['http_error_status']=getattr(exc,'code',None)

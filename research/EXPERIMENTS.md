@@ -301,3 +301,12 @@ calendar can screen70datecrossproduct(54valid) in1request,180–186/month, but d
 not replace full31hper-direction checks. No verifiedfreefull-frequencysource.
 HasData15credits/call makes full31dayuse301320credits; entryplan insufficient.
 No money/flightcredits spent or production provider changed.
+
+## E016 — reduce requests while preserving truthful coverage
+
+User asks ways to make searches cheaper. Research supported calendar batching,
+known-itinerary refresh and native cache semantics, not only supplier pricing.
+Read public first-party contracts; no live flight call, subscription, new key or
+production switch. Distinguish whole-grid price screening from full market/detail
+searches, and never report cached or carried-forward values as fresh verification.
+Current working Free monitor and cadence are unchanged during this research.
