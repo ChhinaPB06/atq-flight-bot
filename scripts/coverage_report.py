@@ -51,7 +51,10 @@ def collect(con):
             audit_quote(row)
         except (AssertionError, KeyError, TypeError, ValueError, IndexError) as exc:
             errors.append({'observation_id': row['id'], 'error_type': type(exc).__name__,
-                           'reason': str(exc) if isinstance(exc, AssertionError) else 'invalid stored quote'})
+                           'reason': str(exc) if str(exc) in {
+                               'currency','ticket_type','verification','price','stored_price','endpoints',
+                               'departure_date','connections','duration_type','duration','stored_duration'
+                           } else 'invalid stored quote'})
     rows = []
     for pair in con.execute('''SELECT p.*,a.checked_at FROM pairs p
             LEFT JOIN api_pair_checks a USING(depart,return_date) ORDER BY p.depart,p.return_date'''):

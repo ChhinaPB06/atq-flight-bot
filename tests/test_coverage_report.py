@@ -31,7 +31,7 @@ class CoverageReportTests(unittest.TestCase):
             tracker.record_live(con,'2027-01-27','2027-04-20',[quote])
             report=collect(con)
             self.assertEqual(report['stored_quotes_audited'],1)
-            self.assertEqual(report['quote_validation_errors'],[])
+            self.assertEqual(report['quote_validation_errors'],[],str(report['quote_validation_errors']))
             self.assertEqual(report['pairs_with_observed_quotes'],1)
             # Database fields still claim 810min; independently detect altered endpoints.
             quote['return'][0]['arrive_at']='2027-04-22 14:00'

@@ -7,6 +7,8 @@ from pathlib import Path
 import subprocess
 import sys
 import zipfile
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 REPO='ChhinaPB06/atq-flight-bot'
 
@@ -64,7 +66,9 @@ def review():
 
 
 if __name__=='__main__':
-    report={'credential_presence':{name:bool(os.getenv(name)) for name in (
+    report={'runner_timezone_offsets':{day:str(datetime.fromisoformat(day).replace(tzinfo=ZoneInfo('America/Edmonton')).utcoffset())
+            for day in ('2027-01-27T12:00','2027-04-20T12:00')},
+        'credential_presence':{name:bool(os.getenv(name)) for name in (
         'AMADEUS_CLIENT_ID','AMADEUS_CLIENT_SECRET','TRAVELPAYOUTS_TOKEN')},
         'historical_runs':[inspect_run(run) for run in (41654833453,41654025980)],
         'pull_request': review() if os.getenv('PREPARE_REVIEW')=='1' else {
