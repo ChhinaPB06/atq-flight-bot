@@ -196,3 +196,16 @@ E010: read first-party SerpApi/SearchApi public pricing and Google Flights
 response documentation on the authorized runner. No account, credentials,
 searches, payment or flight API requests. Select only if a hard free allowance
 and required return/currency/duration contract can be verified from those docs.
+
+E010 observed official access evidence: source run 41582497237 retrieved SerpApi
+pricing ($0 Free, 250 searches/month) and Google Flights two-stage API docs;
+SearchApi advertises 100 free requests/no card but recurring allowance unverified.
+Selected SerpApi as an optional candidate, not a live-proven replacement.
+
+E011 implements a Free-account-only optional adapter and one-shot readiness
+probe. Enforces account plan and remaining quota before searches, atomic 2-call
+reservation, caps of 8/day and 240/month, strict route/date/cabin/CAD/duration and
+explicit separate-ticket rejection. Tests remain synthetic until a real key is
+available. Production scanner is unchanged. Probe checks existing GitHub secret
+SERPAPI_API_KEY; absent key causes credential_missing without network requests.
+No production billing, signup or subscription change is performed.

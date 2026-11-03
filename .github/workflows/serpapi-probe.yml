@@ -1,0 +1,27 @@
+name: Check free API candidate readiness
+on:
+  push:
+    branches: [fix/roundtrip-provider-persistence]
+    paths: [.github/workflows/serpapi-probe.yml]
+permissions:
+  contents: write
+concurrency:
+  group: provider-experiment
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - name: Probe only an existing confirmed Free account
+        env:
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+          FLIGHT_DB: ${{ runner.temp }}/serpapi-budget.sqlite3
+        run: python scripts/serpapi_probe.py "$RUNNER_TEMP/serpapi-evidence/serpapi.json"
+      - name: Preserve safe readiness evidence
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/serpapi-evidence/serpapi.json" ]; then
+            python scripts/publish_evidence.py "$RUNNER_TEMP/serpapi-evidence"
+          fi
