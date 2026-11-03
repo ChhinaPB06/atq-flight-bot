@@ -1,4 +1,4 @@
-name: Validate newly configured Free API access
+name: Inspect Free-plan account metadata
 on:
   workflow_dispatch:
   push:

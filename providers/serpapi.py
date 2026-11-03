@@ -65,6 +65,8 @@ class Client:
 
     def search(self,con,depart,return_date):
         account=self.request('account.json',{})
+        self.account_metadata={k:account.get(k) for k in ('plan_name','plan_id','searches_per_month','total_searches_left')}
+        self.account_metadata['field_names']=sorted(account)
         if str(account.get('plan_name','')).casefold()!='free':
             raise ProviderAccessError('Only an explicitly confirmed Free account is allowed')
         remaining=account.get('total_searches_left')

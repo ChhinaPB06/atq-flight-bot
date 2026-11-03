@@ -12,12 +12,14 @@ if not os.getenv('SERPAPI_API_KEY'):
     report['outcome']='credential_missing'
 else:
     try:
+        client=Client()
         with sqlite3.connect(os.environ['FLIGHT_DB']) as con:
-            offers,diagnostic=Client().search(con,'2027-01-25','2027-04-16')
+            offers,diagnostic=client.search(con,'2027-01-25','2027-04-16')
         report.update(outcome='candidate_quotes_require_live_review' if offers else 'no_usable_quote',
                       diagnostic=diagnostic,sample_offers=offers[:3])
     except Exception as exc:
         report.update(outcome='blocked_or_failed',error_type=type(exc).__name__)
+        report['account_metadata']=getattr(locals().get('client'),'account_metadata',{})
         from providers.serpapi import ProviderAccessError, BudgetExhausted, ProviderDataError
         if isinstance(exc,(ProviderAccessError,BudgetExhausted,ProviderDataError)):
             report['safe_reason']=str(exc)
