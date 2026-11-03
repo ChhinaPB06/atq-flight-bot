@@ -70,3 +70,17 @@ class SerpApiTests(unittest.TestCase):
         with sqlite3.connect(':memory:') as con:
             reserve(con,now,daily_limit=4);reserve(con,now,daily_limit=4)
             with self.assertRaises(BudgetExhausted):reserve(con,now,daily_limit=4)
+
+    def test_cheapest_valid_outbound_is_expanded(self):
+        expensive=flight('YYC','ATQ','2027-01-27',price=2500);expensive['departure_token']='expensive'
+        cheap=flight('YYC','ATQ','2027-01-27',price=2100);cheap['departure_token']='cheaper'
+        back=flight('ATQ','YYC','2027-04-20',price=2245)
+        calls=[]
+        replies=[{'plan_name':'Free Plan','plan_id':'free','plan_monthly_price':0,'total_searches_left':250},
+                 {'search_parameters':{'currency':'CAD'},'best_flights':[expensive],'other_flights':[cheap]},
+                 {'search_parameters':{'currency':'CAD'},'best_flights':[back]}]
+        def request(path,params):calls.append(params);return replies.pop(0)
+        with sqlite3.connect(':memory:') as con:
+            offers,_=Client('test-only',request).search(con,'2027-01-27','2027-04-20')
+        self.assertEqual(calls[-1]['departure_token'],'cheaper')
+        self.assertEqual(offers[0]['price_cad'],2245)

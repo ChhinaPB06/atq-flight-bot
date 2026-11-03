@@ -247,3 +247,18 @@ coverage. User wants whole-grid research and four-hour cadence; existing Free
 budget8/day and240/month permits4pairs/day, first54pairpass~13.5days, not a full
 fresh grid every4hours. Trigger two more bounded live scans under the new scope
 and durable quota, with Telegram still disabled for testing.
+
+## E014 — initial sweep pacing and activation
+
+Narrowed live source41588472235 completed2scans (54pairs retained, history17→25),
+bestCAD2245 Jan27/Apr20,83days,1525/1690minutes. Initial3pairbatch41589012699 passed;
+API firstpass6/54. Metadata/history preservation, rolling-hour40cap and steady
+2pairs/day tests pass. Cheapest valid outbound is now chosen across both API
+result groups before selecting returns (still one bounded expansion per pair).
+
+Initial phase can use18pairs/trigger and120searches/day under240/month; steady
+phase4searches/day. This uses the free allowance for early whole-grid research
+without promising repeated54pairfreshness every4hours. Normal fast-forward main
+activation was performed for user's requested operational schedule; no force or
+sensitive setting change. Main run41589448891 is the first operational sweep.
+No PR was fabricated after Actions PR-creation policy refusal.42tests pass.

@@ -94,7 +94,7 @@ class Client:
                 'outbound_date':depart,'return_date':return_date,'currency':'CAD',
                 'adults':1,'travel_class':1,'type':1,'hl':'en','gl':'ca'}
         outbound_payload=self.request('search.json',params)
-        candidates=rows(outbound_payload)
+        candidates=sorted(rows(outbound_payload),key=lambda item: item.get('price') if type(item.get('price')) is int and item['price']>0 else float('inf'))
         selected=None
         for item in candidates:
             try:out_duration,out_legs=journey(item,'YYC','ATQ',depart)
