@@ -214,6 +214,24 @@ A main-workflow configuration push event permits one immediate operational scan
 as well as the unchanged '23 */4 * * *' cron; future ordinary source/docs pushes
 will not trigger flight queries. Main workflow completion is to be observed.
 
+## Latest execution checkpoint — native pilot and persisted coverage
+
+Native pilot commit b0ce65c is pushed to the development branch; it is not
+deployed to main. Ran all 54 offline tests successfully and actionlint on every
+workflow. Ran the CLI twice against one explicitly synthetic email in a fresh
+temporary database: one deduplicated unverified event, zero live observations.
+This does not validate a real Google email template or a live verification.
+The real pilot remains blocked on a user-enabled watch and approved .eml export;
+no signed-in browser/mail connector is available. Telegram remains deferred.
+
+Read-only flight-data snapshot 293b7855f676ca4d88a8a95d5a99f05be0cc80ac has
+SQLite integrity ok and latest pair check 2026-11-03T12:11:35+00:00. Cumulative
+API coverage is 38/54 (70.4%), with 34 valid-fare pairs, one duration-filtered
+pair, three empty/unverified pairs and 16 unchecked. This is not fresh coverage
+of all 54 pairs. Best observed quote remains CAD2074 Jan29/Apr21, durations
+1810/1702 minutes, observed 06:31:27 UTC; not checkout-confirmed. No new provider
+request or search-credit expenditure was needed for this execution checkpoint.
+
 ## Operational retry checkpoint
 
 Main run41590235586 advanced to20/54completedAPIchecks,19with usable quote data
