@@ -31,7 +31,13 @@ def reserve(con,now=None,daily_limit=8):
 
 
 def rows(payload):
-    if payload.get('error'):raise ProviderDataError('Provider reported an API error')
+    if payload.get('error'):
+        message=str(payload['error']).lower()
+        if any(text in message for text in ("hasn't returned any results",'has not returned any results','no results found','no flights found')):
+            return []  # No usable provider data; not proof of no inventory.
+        if any(text in message for text in ('quota','rate limit','hourly limit','run out of searches','too many requests')):
+            raise ProviderRateLimit('Provider search quota or rate limit reached')
+        raise ProviderDataError('Provider reported an unclassified API error')
     if payload.get('search_parameters',{}).get('currency')!='CAD':
         raise ProviderDataError('Returned search currency is not CAD')
     return [*payload.get('best_flights',[]),*payload.get('other_flights',[])]

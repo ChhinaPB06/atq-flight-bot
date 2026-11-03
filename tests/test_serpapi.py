@@ -84,3 +84,11 @@ class SerpApiTests(unittest.TestCase):
             offers,_=Client('test-only',request).search(con,'2027-01-27','2027-04-20')
         self.assertEqual(calls[-1]['departure_token'],'cheaper')
         self.assertEqual(offers[0]['price_cad'],2245)
+
+    def test_provider_no_results_is_unverified_data_absence(self):
+        from providers.serpapi import rows
+        self.assertEqual(rows({'error':"Google Flights hasn't returned any results for this query."}),[])
+
+    def test_provider_quota_json_is_not_swallowed_as_empty(self):
+        from providers.serpapi import rows,ProviderRateLimit
+        with self.assertRaises(ProviderRateLimit):rows({'error':'You have reached your plan hourly limit.'})

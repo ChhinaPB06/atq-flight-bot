@@ -262,3 +262,12 @@ without promising repeated54pairfreshness every4hours. Normal fast-forward main
 activation was performed for user's requested operational schedule; no force or
 sensitive setting change. Main run41589448891 is the first operational sweep.
 No PR was fabricated after Actions PR-creation policy refusal.42tests pass.
+
+E014 operational outcome: main run41589448891 saved14/54APIcheckedpairs and found
+CAD2233 Jan27/Apr23 (1780/1832minutes). It then stopped on ProviderDataError for
+Jan28/Apr20; all earlier results and quota reservations persisted. Original
+adapter collapsed all JSON error envelopes to one exception. Add conservative
+known-no-results envelope handling as unverified data absence, keep quota/rate
+errors explicit, and continue initial grid after no-data. Unknown errors still
+stop; this is not a proven diagnosis of the earlier opaque envelope until retry.
+No results must never be interpreted as zero flights. Add regression tests.
