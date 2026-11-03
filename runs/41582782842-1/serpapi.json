@@ -1,0 +1,5 @@
+{
+  "provider": "serpapi_google_flights",
+  "checkout_verified": false,
+  "outcome": "credential_missing"
+}
