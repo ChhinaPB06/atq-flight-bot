@@ -1,0 +1,28 @@
+{
+  "adults": 1,
+  "cabin": "economy",
+  "channel": "browser",
+  "checkout_verified": false,
+  "depart": "2027-01-25",
+  "diagnostic": {
+    "expanded_outbound_limit": 1,
+    "fetch_events": [
+      {
+        "decoded_rows": 7,
+        "stage": "initial_outbound"
+      },
+      {
+        "error_type": "SearchRejectedError",
+        "failure": "provider_error",
+        "stage": "selected_return"
+      }
+    ]
+  },
+  "distribution_version": "0.10.0",
+  "error_type": "SearchRejectedError",
+  "observed_at_utc": "2026-11-03T04:35:54+00:00",
+  "outcome": "provider_error",
+  "requested_currency": "CAD",
+  "return_date": "2027-04-16",
+  "top_n": 1
+}
